@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Universal Game Design Document Maker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    h1, h2 { color: #333; }
+    textarea, input, button {
+      width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box;
+    }
+    .section { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    #output { white-space: pre-wrap; background: #eef; padding: 15px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+  <h1>Universal Game Design Document (GDD) Maker</h1>
+
+  <!-- Game Overview -->
+  <div class="section">
+    <h2>1. Game Overview</h2>
+    <input type="text" id="title" placeholder="Game Title">
+    <input type="text" id="genre" placeholder="Genre (e.g., RPG, FPS, Puzzle)">
+    <textarea id="summary" placeholder="High-level summary of the game (setting, concept, hook)..."></textarea>
+  </div>
+
+  <!-- Gameplay -->
+  <div class="section">
+    <h2>2. Gameplay</h2>
+    <textarea id="mechanics" placeholder="Core mechanics, controls, systems..."></textarea>
+    <textarea id="goals" placeholder="Player objectives and progression systems..."></textarea>
+  </div>
+
+  <!-- Story and Characters -->
+  <div class="section">
+    <h2>3. Story & Characters</h2>
+    <textarea id="story" placeholder="Game narrative, world, lore..."></textarea>
+    <textarea id="characters" placeholder="Main characters, roles, backstories..."></textarea>
+  </div>
+
+  <!-- Art and Audio -->
+  <div class="section">
+    <h2>4. Art & Audio Style</h2>
+    <textarea id="art" placeholder="Visual style, camera perspective, color palette..."></textarea>
+    <textarea id="audio" placeholder="Music, sound effects, voice acting..."></textarea>
+  </div>
+
+  <!-- Technical -->
+  <div class="section">
+    <h2>5. Technical Specs</h2>
+    <textarea id="platforms" placeholder="Target platforms (PC, console, mobile)..."></textarea>
+    <textarea id="tools" placeholder="Game engine, libraries, tools..."></textarea>
+  </div>
+
+  <!-- Output Button -->
+  <button onclick="generateGDD()">Generate GDD</button>
+
+  <!-- Output Preview -->
+  <h2>📄 GDD Output</h2>
+  <div id="output"></div>
+
+  <script>
+    function generateGDD() {
+      const gdd = `
+===== GAME DESIGN DOCUMENT =====
+
+1. GAME OVERVIEW
+Title: ${document.getElementById("title").value}
+Genre: ${document.getElementById("genre").value}
+Summary: ${document.getElementById("summary").value}
+
+2. GAMEPLAY
+Mechanics: ${document.getElementById("mechanics").value}
+Goals: ${document.getElementById("goals").value}
+
+3. STORY & CHARACTERS
+Story: ${document.getElementById("story").value}
+Characters: ${document.getElementById("characters").value}
+
+4. ART & AUDIO STYLE
+Art: ${document.getElementById("art").value}
+Audio: ${document.getElementById("audio").value}
+
+5. TECHNICAL SPECS
+Platforms: ${document.getElementById("platforms").value}
+Tools & Engine: ${document.getElementById("tools").value}
+      `;
+      document.getElementById("output").innerText = gdd;
+    }
+  </script>
+
+</body>
+</html>

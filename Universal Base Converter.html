@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Universal Base Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      margin-bottom: 6px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+    }
+    input.error {
+      border-color: red;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.85em;
+      margin-bottom: 10px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h2>Universal Base Converter</h2>
+
+  <label>Raw Text (UTF-8 string)</label>
+  <input id="rawText" oninput="handleRawText()" placeholder="Enter a word or phrase..." />
+  <div id="converters"></div>
+
+  <script>
+    const base91Charset = (() => {
+      let chars = '';
+      for (let i = 33; i <= 126; i++) {
+        if (i !== 34 && i !== 92) {
+          chars += String.fromCharCode(i);
+        }
+      }
+      return chars;
+    })();
+
+    const bases = [
+      { base: 2, name: "Binary" },
+      { base: 3, name: "Ternary" },
+      { base: 4, name: "Quaternary" },
+      { base: 5, name: "Quinary" },
+      { base: 6, name: "Senary" },
+      { base: 7, name: "Septenary" },
+      { base: 8, name: "Octal" },
+      { base: 9, name: "Nonary" },
+      { base: 10, name: "Decimal" },
+      { base: 11, name: "Undecimal" },
+      { base: 12, name: "Duodecimal" },
+      { base: 13, name: "Base-13" },
+      { base: 14, name: "Base-14" },
+      { base: 15, name: "Base-15" },
+      { base: 16, name: "Hexadecimal" },
+      { base: 17, name: "Base-17" },
+      { base: 18, name: "Base-18" },
+      { base: 19, name: "Base-19" },
+      { base: 20, name: "Vigesimal" },
+      { base: 32, name: "Base-32" },
+      { base: 36, name: "Base-36" },
+      { base: 60, name: "Sexagesimal" },
+      { base: 62, name: "Base-62" },
+      { base: 64, name: "Base-64" },
+      { base: 85, name: "Base-85" },
+      { base: 91, name: "Base-91" }
+    ];
+
+    const base62Charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const base32Charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+
+    const container = document.getElementById("converters");
+
+    bases.forEach(b => {
+      const label = document.createElement("label");
+      label.innerText = `${b.name} (Base ${b.base})`;
+
+      const input = document.createElement("input");
+      input.id = `base${b.base}`;
+      input.dataset.base = b.base;
+      input.oninput = () => convertFrom(input);
+
+      const error = document.createElement("div");
+      error.className = "error-message";
+      error.id = `error${b.base}`;
+
+      container.appendChild(label);
+      container.appendChild(input);
+      container.appendChild(error);
+    });
+
+    let updating = false;
+
+    function handleRawText() {
+      const text = document.getElementById("rawText").value;
+      if (!text) return;
+
+      const utf8Bytes = new TextEncoder().encode(text);
+      let decimal = 0;
+      for (let i = 0; i < utf8Bytes.length; i++) {
+        decimal = (decimal << 8) + utf8Bytes[i];
+      }
+
+      updateAll(decimal);
+    }
+
+    function convertFrom(sourceInput) {
+      if (updating) return;
+      updating = true;
+
+      const baseFrom = parseInt(sourceInput.dataset.base);
+      const value = sourceInput.value.trim();
+      const errorDiv = document.getElementById(`error${baseFrom}`);
+      errorDiv.textContent = '';
+      sourceInput.classList.remove("error");
+
+      let decimal;
+
+      try {
+        if (baseFrom === 60 && value.includes(':')) {
+          const parts = value.split(':').reverse();
+          decimal = parts.reduce((acc, curr, idx) => acc + parseInt(curr) * Math.pow(60, idx), 0);
+        } else if (baseFrom === 64) {
+          const decoded = atob(value);
+          decimal = 0;
+          for (let i = 0; i < decoded.length; i++) {
+            decimal = (decimal << 8) + decoded.charCodeAt(i);
+          }
+        } else if (baseFrom === 32) {
+          decimal = baseToDecimal(value.toUpperCase(), base32Charset);
+        } else if (baseFrom === 62) {
+          decimal = baseToDecimal(value, base62Charset);
+        } else if (baseFrom === 85) {
+          decimal = ascii85Decode(value);
+        } else if (baseFrom === 91) {
+          decimal = baseToDecimal(value, base91Charset);
+        } else {
+          decimal = parseInt(value, baseFrom);
+        }
+
+        if (isNaN(decimal)) throw new Error("Invalid input");
+        updateAll(decimal, sourceInput);
+      } catch {
+        sourceInput.classList.add("error");
+        errorDiv.textContent = "Invalid input for base " + baseFrom;
+        clearOtherFields(baseFrom);
+      }
+
+      updating = false;
+    }
+
+    function updateAll(decimal, excludeInput = null) {
+      updating = true;
+
+      bases.forEach(b => {
+        const output = document.getElementById(`base${b.base}`);
+        const errorDiv = document.getElementById(`error${b.base}`);
+        if (output === excludeInput) return;
+
+        try {
+          errorDiv.textContent = '';
+          output.classList.remove("error");
+
+          if (b.base === 60) {
+            output.value = toSexagesimal(decimal);
+          } else if (b.base === 64) {
+            const bytes = [];
+            let temp = decimal;
+            while (temp > 0) {
+              bytes.unshift(temp & 0xFF);
+              temp >>= 8;
+            }
+            const text = String.fromCharCode(...bytes);
+            output.value = btoa(text);
+          } else if (b.base === 32) {
+            output.value = decimalToBase(decimal, base32Charset);
+          } else if (b.base === 62) {
+            output.value = decimalToBase(decimal, base62Charset);
+          } else if (b.base === 85) {
+            output.value = ascii85Encode(decimal);
+          } else if (b.base === 91) {
+            output.value = decimalToBase(decimal, base91Charset);
+          } else {
+            output.value = decimal.toString(b.base).toUpperCase();
+          }
+        } catch {
+          output.classList.add("error");
+          errorDiv.textContent = "Conversion error";
+        }
+      });
+
+      try {
+        const bytes = [];
+        let temp = decimal;
+        while (temp > 0) {
+          bytes.unshift(temp & 0xFF);
+          temp >>= 8;
+        }
+        const text = new TextDecoder().decode(new Uint8Array(bytes));
+        if (/^[\x20-\x7E]+$/.test(text)) {
+          document.getElementById("rawText").value = text;
+        }
+      } catch {
+        document.getElementById("rawText").value = "";
+      }
+
+      updating = false;
+    }
+
+    function clearOtherFields(skipBase) {
+      bases.forEach(b => {
+        if (b.base !== skipBase) {
+          document.getElementById(`base${b.base}`).value = '';
+          document.getElementById(`error${b.base}`).textContent = '';
+          document.getElementById(`base${b.base}`).classList.remove("error");
+        }
+      });
+      document.getElementById("rawText").value = '';
+    }
+
+    function toSexagesimal(num) {
+      const parts = [];
+      do {
+        parts.unshift(num % 60);
+        num = Math.floor(num / 60);
+      } while (num > 0);
+      return parts.join(':');
+    }
+
+    function decimalToBase(num, charset) {
+      if (num === 0) return charset[0];
+      let result = '';
+      const base = charset.length;
+      while (num > 0) {
+        result = charset[num % base] + result;
+        num = Math.floor(num / base);
+      }
+      return result;
+    }
+
+    function baseToDecimal(str, charset) {
+      const base = charset.length;
+      return str.split('').reverse().reduce((acc, char, i) => {
+        const val = charset.indexOf(char);
+        if (val === -1) throw new Error("Invalid character");
+        return acc + val * Math.pow(base, i);
+      }, 0);
+    }
+
+    function ascii85Encode(num) {
+      let chars = '';
+      for (let i = 0; i < 5; i++) {
+        chars = String.fromCharCode((num % 85) + 33) + chars;
+        num = Math.floor(num / 85);
+      }
+      return chars;
+    }
+
+    function ascii85Decode(str) {
+      let num = 0;
+      for (let i = 0; i < str.length; i++) {
+        num = num * 85 + (str.charCodeAt(i) - 33);
+      }
+      return num;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word & Character Counter</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #33ff33;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      text-shadow: 0 0 5px #33ff33;
+    }
+
+    textarea {
+      width: 100%;
+      height: 250px;
+      background-color: #000000;
+      color: #33ff33;
+      border: 2px solid #33ff33;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px #33ff33;
+      resize: vertical;
+    }
+
+    .counts {
+      margin-top: 20px;
+      font-size: 1.2rem;
+      text-shadow: 0 0 3px #33ff33;
+    }
+
+    .counts span {
+      display: inline-block;
+      margin-right: 30px;
+    }
+
+    .flash {
+      animation: flash 0.4s ease-in-out;
+    }
+
+    @keyframes flash {
+      0% { opacity: 1; }
+      50% { opacity: 0.2; }
+      100% { opacity: 1; }
+    }
+
+    button {
+      background-color: transparent;
+      color: #33ff33;
+      border: 1px solid #33ff33;
+      padding: 5px 15px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 15px;
+      margin-right: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 5px #33ff33;
+    }
+
+    button:hover {
+      background-color: #33ff33;
+      color: #000000;
+    }
+
+    ::selection {
+      background: #33ff33;
+      color: #000000;
+    }
+  </style>
+</head>
+<body>
+  <h1>🖥️ Word & Character Counter</h1>
+  <textarea id="textInput" placeholder="Type or paste your text here..."></textarea>
+  <div class="counts">
+    <span id="wordCount">Words: 0</span>
+    <span id="charCount">Characters: 0</span>
+    <span id="sentenceCount">Sentences: 0</span>
+    <span id="paragraphCount">Paragraphs: 0</span>
+    <span id="readTime">Read Time: 0 min</span>
+  </div>
+  <div>
+    <button onclick="copyText()">📋 Copy</button>
+    <button onclick="clearText()">🗑️ Clear</button>
+  </div>
+  <div style="margin-top: 20px;">
+  <button onclick="downloadText()">⬇️ Export .txt</button>
+  <button onclick="toggleStats()">📊 Toggle Stats</button>
+  <button onclick="togglePreview()">📝 Markdown Preview</button>
+  </div>
+
+  <div id="markdownPreview" style="margin-top:20px; display:none; white-space:pre-wrap; border:1px dashed #33ff33; padding:15px;"></div>
+  <div id="wordFreq" style="margin-top:20px;"></div>
+
+  <script>
+    const textInput = document.getElementById('textInput');
+    const wordCount = document.getElementById('wordCount');
+    const charCount = document.getElementById('charCount');
+    const sentenceCount = document.getElementById('sentenceCount');
+    const paragraphCount = document.getElementById('paragraphCount');
+    const readTime = document.getElementById('readTime');
+
+    const flash = el => {
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 400);
+    };
+
+    const updateCounts = () => {
+      const text = textInput.value;
+      const words = text.trim().split(/\s+/).filter(w => w.length);
+      const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+      const paragraphs = text.split(/\n+/).filter(p => p.trim().length);
+
+      wordCount.textContent = `Words: ${words.length}`;
+      charCount.textContent = `Characters: ${text.length}`;
+      sentenceCount.textContent = `Sentences: ${sentences.length}`;
+      paragraphCount.textContent = `Paragraphs: ${paragraphs.length}`;
+      readTime.textContent = `Read Time: ${Math.ceil(words.length / 200)} min`;
+
+      [wordCount, charCount, sentenceCount, paragraphCount, readTime].forEach(flash);
+
+      localStorage.setItem('savedText', text);
+    };
+
+    const copyText = () => {
+      navigator.clipboard.writeText(textInput.value).then(() => alert('Text copied!'));
+    };
+
+    const clearText = () => {
+      if (confirm('Clear all text?')) {
+        textInput.value = '';
+        updateCounts();
+      }
+    };
+
+    textInput.addEventListener('input', updateCounts);
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('savedText');
+      if (saved) {
+        textInput.value = saved;
+        updateCounts();
+      }
+    });
+
+    textInput.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'Enter') {
+        e.preventDefault();
+        clearText();
+      }
+    });
+	
+	const preview = document.getElementById('markdownPreview');
+  const freqDisplay = document.getElementById('wordFreq');
+  let statsVisible = true;
+
+  const toggleStats = () => {
+    statsVisible = !statsVisible;
+    document.querySelector('.counts').style.display = statsVisible ? 'block' : 'none';
+  };
+
+  const togglePreview = () => {
+    preview.style.display = preview.style.display === 'none' ? 'block' : 'none';
+    if (preview.style.display === 'block') {
+      preview.innerHTML = renderMarkdown(textInput.value);
+    }
+  };
+
+  const downloadText = () => {
+    const blob = new Blob([textInput.value], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'text-output.txt';
+    link.click();
+  };
+
+  const renderMarkdown = (text) => {
+    return text
+      .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+      .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+      .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+      .replace(/\*\*(.*?)\*\*/gim, '<b>$1</b>')
+      .replace(/\*(.*?)\*/gim, '<i>$1</i>')
+      .replace(/`(.*?)`/gim, '<code>$1</code>')
+      .replace(/\n$/gim, '<br />');
+  };
+
+  const showWordFrequency = (text) => {
+    const words = text.toLowerCase().match(/\b\w+\b/g) || [];
+    const freq = {};
+    words.forEach(word => freq[word] = (freq[word] || 0) + 1);
+    const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    freqDisplay.innerHTML = `<h3 style="text-shadow:0 0 2px #33ff33;">Top Words</h3>` +
+      sorted.map(([word, count]) =>
+        `<span style="margin-right:15px; cursor:pointer;" 
+                onmouseover="highlightWord('${word}')" 
+                onmouseout="removeHighlight()">
+          <b>${word}</b>: ${count}
+        </span>`).join('');
+  };
+
+  const highlightWord = (word) => {
+    const regex = new RegExp(`\\b(${word})\\b`, 'gi');
+    textInput.innerHTML = textInput.value.replace(regex, '***$1***');
+    textInput.style.outline = '2px dashed #33ff33';
+  };
+
+  const removeHighlight = () => {
+    textInput.style.outline = 'none';
+  };
+
+  // Extend updateCounts to also update preview and word frequency
+  const originalUpdate = updateCounts;
+  updateCounts = () => {
+    originalUpdate();
+    if (preview.style.display === 'block') {
+      preview.innerHTML = renderMarkdown(textInput.value);
+    }
+    showWordFrequency(textInput.value);
+  };
+
+  </script>
+</body>
+</html>

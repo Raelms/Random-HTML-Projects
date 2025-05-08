@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Color Picker</title>
+  <style>
+    :root {
+      --bg: #f0f0f0;
+      --text: #000;
+      --box: #fff;
+    }
+
+    body.dark {
+      --bg: #1e1e1e;
+      --text: #eee;
+      --box: #2c2c2c;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      text-align: center;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    #color-spectrum {
+      cursor: crosshair;
+      border: 1px solid #aaa;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .inputs {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .input-group {
+      background: var(--box);
+      border-radius: 8px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-direction: row;
+    }
+
+    .input-group input {
+      padding: 6px;
+      font-size: 14px;
+      width: 180px;
+      border: 1px solid #ccc;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .input-group button {
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+    }
+
+    .preview {
+      margin-top: 20px;
+      width: 100px;
+      height: 100px;
+      border: 2px solid #333;
+      margin-left: auto;
+      margin-right: auto;
+      border-radius: 10px;
+    }
+
+    .toggle-dark {
+      margin-top: 20px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--text);
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .toggle-dark:hover {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    #sliders .input-group {
+      flex-direction: column;
+      align-items: stretch;
+      width: 100px;
+    }
+
+    #sliders label {
+      font-weight: bold;
+    }
+
+    #sliders input[type="range"] {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Advanced Color Picker</h1>
+  <canvas id="color-spectrum" width="300" height="150"></canvas>
+
+  <div class="inputs">
+    <div class="input-group">
+      <input type="text" id="hex-input" placeholder="#HEX">
+      <button onclick="copyToClipboard('hex-input')">Copy</button>
+    </div>
+    <div class="input-group">
+      <input type="text" id="rgb-input" placeholder="rgb(r, g, b)">
+      <button onclick="copyToClipboard('rgb-input')">Copy</button>
+    </div>
+    <div class="input-group">
+      <input type="text" id="hsl-input" placeholder="hsl(h, s%, l%)">
+      <button onclick="copyToClipboard('hsl-input')">Copy</button>
+    </div>
+    <div class="input-group">
+      <input type="text" id="hsv-input" placeholder="hsv(h, s%, v%)">
+      <button onclick="copyToClipboard('hsv-input')">Copy</button>
+    </div>
+    <div class="input-group">
+      <input type="text" id="cmyk-input" placeholder="cmyk(c%, m%, y%, k%)">
+      <button onclick="copyToClipboard('cmyk-input')">Copy</button>
+    </div>
+  </div>
+
+  <div class="inputs" id="sliders">
+    <div class="input-group">
+      <label>R</label>
+      <input type="range" id="r-slider" min="0" max="255">
+      <span id="r-val">0</span>
+    </div>
+    <div class="input-group">
+      <label>G</label>
+      <input type="range" id="g-slider" min="0" max="255">
+      <span id="g-val">0</span>
+    </div>
+    <div class="input-group">
+      <label>B</label>
+      <input type="range" id="b-slider" min="0" max="255">
+      <span id="b-val">0</span>
+    </div>
+  </div>
+
+  <div class="preview" id="color-preview"></div>
+
+  <button class="toggle-dark" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+
+  <script>
+    const canvas = document.getElementById('color-spectrum');
+    const ctx = canvas.getContext('2d');
+    const hexInput = document.getElementById('hex-input');
+    const rgbInput = document.getElementById('rgb-input');
+    const hslInput = document.getElementById('hsl-input');
+    const hsvInput = document.getElementById('hsv-input');
+    const cmykInput = document.getElementById('cmyk-input');
+    const preview = document.getElementById('color-preview');
+
+    const rSlider = document.getElementById('r-slider');
+    const gSlider = document.getElementById('g-slider');
+    const bSlider = document.getElementById('b-slider');
+    const rVal = document.getElementById('r-val');
+    const gVal = document.getElementById('g-val');
+    const bVal = document.getElementById('b-val');
+
+    function drawSpectrum() {
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, 'red');
+      gradient.addColorStop(0.17, 'yellow');
+      gradient.addColorStop(0.33, 'lime');
+      gradient.addColorStop(0.5, 'cyan');
+      gradient.addColorStop(0.67, 'blue');
+      gradient.addColorStop(0.83, 'magenta');
+      gradient.addColorStop(1, 'red');
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const whiteGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      whiteGradient.addColorStop(0, 'rgba(255,255,255,1)');
+      whiteGradient.addColorStop(0.5, 'rgba(255,255,255,0)');
+      whiteGradient.addColorStop(0.5, 'rgba(0,0,0,0)');
+      whiteGradient.addColorStop(1, 'rgba(0,0,0,1)');
+      ctx.fillStyle = whiteGradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.replace('#', '');
+      if (hex.length === 3) hex = hex.split('').map(h => h + h).join('');
+      const bigint = parseInt(hex, 16);
+      return {
+        r: (bigint >> 16) & 255,
+        g: (bigint >> 8) & 255,
+        b: bigint & 255
+      };
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0;
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return {
+        h: Math.round(h * 360),
+        s: Math.round(s * 100),
+        l: Math.round(l * 100)
+      };
+    }
+
+    function rgbToHsv(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const v = max;
+      const d = max - min;
+      const s = max === 0 ? 0 : d / max;
+      let h = 0;
+      if (max !== min) {
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return {
+        h: Math.round(h * 360),
+        s: Math.round(s * 100),
+        v: Math.round(v * 100)
+      };
+    }
+
+    function rgbToCmyk(r, g, b) {
+      const c = 1 - (r / 255);
+      const m = 1 - (g / 255);
+      const y = 1 - (b / 255);
+      const k = Math.min(c, m, y);
+      const denom = (1 - k) || 1;
+      return {
+        c: Math.round(100 * (c - k) / denom),
+        m: Math.round(100 * (m - k) / denom),
+        y: Math.round(100 * (y - k) / denom),
+        k: Math.round(100 * k)
+      };
+    }
+
+    function updateSliders(r, g, b) {
+      rSlider.value = r;
+      gSlider.value = g;
+      bSlider.value = b;
+      rVal.textContent = r;
+      gVal.textContent = g;
+      bVal.textContent = b;
+    }
+
+    function sliderChange() {
+      const r = parseInt(rSlider.value);
+      const g = parseInt(gSlider.value);
+      const b = parseInt(bSlider.value);
+      updateSliders(r, g, b);
+      setColor(r, g, b);
+    }
+
+    [rSlider, gSlider, bSlider].forEach(slider => {
+      slider.addEventListener('input', sliderChange);
+    });
+
+    function setColor(r, g, b) {
+      const hex = rgbToHex(r, g, b);
+      const hsl = rgbToHsl(r, g, b);
+      const hsv = rgbToHsv(r, g, b);
+      const cmyk = rgbToCmyk(r, g, b);
+
+      preview.style.backgroundColor = hex;
+      hexInput.value = hex;
+      rgbInput.value = `rgb(${r}, ${g}, ${b})`;
+      hslInput.value = `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`;
+      hsvInput.value = `hsv(${hsv.h}, ${hsv.s}%, ${hsv.v}%)`;
+      cmykInput.value = `cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`;
+
+      updateSliders(r, g, b);
+    }
+
+    canvas.addEventListener('click', function(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const data = ctx.getImageData(x, y, 1, 1).data;
+      setColor(data[0], data[1], data[2]);
+    });
+
+    hexInput.addEventListener('input', function() {
+      try {
+        const rgb = hexToRgb(hexInput.value);
+        setColor(rgb.r, rgb.g, rgb.b);
+      } catch {}
+    });
+
+    rgbInput.addEventListener('input', function() {
+      const match = rgbInput.value.match(/rgb\s*\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)/i);
+      if (match) {
+        const [r, g, b] = match.slice(1, 4).map(Number);
+        if ([r, g, b].every(n => n >= 0 && n <= 255)) {
+          setColor(r, g, b);
+        }
+      }
+    });
+
+    function copyToClipboard(id) {
+      const input = document.getElementById(id);
+      input.select();
+      input.setSelectionRange(0, 99999); // for mobile
+      navigator.clipboard.writeText(input.value);
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+    }
+
+    drawSpectrum();
+    setColor(255, 0, 0); // Initial color
+  </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Military Battle Report Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 1000px; margin: auto; }
+    h2 { margin-bottom: 20px; }
+    .field { margin-bottom: 12px; }
+    .field label { font-weight: bold; display: block; margin-bottom: 4px; }
+    input, textarea, select {
+      width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;
+    }
+    textarea { resize: vertical; height: 80px; }
+
+    .drag-container { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px; }
+    .box {
+      flex: 1;
+      min-width: 300px;
+      min-height: 200px;
+      border: 2px dashed #999;
+      padding: 10px;
+      background-color: #f9f9f9;
+      overflow-y: auto;
+    }
+    .draggable {
+      background: #dfe9f3;
+      margin: 5px 0;
+      padding: 6px;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      cursor: move;
+    }
+
+    .actions {
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Advanced Military Battle Report Generator</h2>
+
+<div class="field"><label>Operation Name:</label><input type="text" id="operation"></div>
+<div class="field"><label>Commanding Officer:</label><input type="text" id="commander"></div>
+<div class="field"><label>Location:</label><input type="text" id="location"></div>
+<div class="field"><label>Date:</label><input type="date" id="date"></div>
+<div class="field"><label>Units Involved:</label><input type="text" id="units"></div>
+<div class="field"><label>Objective:</label><textarea id="objective"></textarea></div>
+<div class="field"><label>Weather Conditions:</label><input type="text" id="weather"></div>
+<div class="field"><label>Battle Duration:</label><input type="text" id="duration" placeholder="e.g. 3 hours 20 mins"></div>
+<div class="field"><label>Casualties (Own / Enemy):</label><input type="text" id="casualties" placeholder="e.g. 20 / 50"></div>
+<div class="field"><label>Outcome:</label><input type="text" id="outcome"></div>
+<div class="field"><label>Additional Notes:</label><textarea id="notes"></textarea></div>
+
+<div class="drag-container">
+  <div>
+    <strong>Available Tactics</strong>
+    <div class="box" id="tactics-list">
+      <!-- You can append many more tactics here -->
+<div class="draggable" draggable="true">Ambush</div>
+<div class="draggable" draggable="true">Flanking Maneuver</div>
+<div class="draggable" draggable="true">Air Support</div>
+<div class="draggable" draggable="true">Decoy Operation</div>
+<div class="draggable" draggable="true">Night Raid</div>
+<div class="draggable" draggable="true">Siege</div>
+<div class="draggable" draggable="true">Guerrilla Warfare</div>
+<div class="draggable" draggable="true">Shock and Awe</div>
+<div class="draggable" draggable="true">Encirclement</div>
+<div class="draggable" draggable="true">Frontal Assault</div>
+<div class="draggable" draggable="true">Scorched Earth</div>
+<div class="draggable" draggable="true">Hit-and-Run</div>
+<div class="draggable" draggable="true">Search and Destroy</div>
+<div class="draggable" draggable="true">Feigned Retreat</div>
+<div class="draggable" draggable="true">Infiltration</div>
+<div class="draggable" draggable="true">Blockade</div>
+<div class="draggable" draggable="true">Pincer Movement</div>
+<div class="draggable" draggable="true">Divide and Conquer</div>
+<div class="draggable" draggable="true">Artillery Barrage</div>
+<div class="draggable" draggable="true">Naval Bombardment</div>
+<div class="draggable" draggable="true">Electronic Warfare</div>
+<div class="draggable" draggable="true">Psychological Operations</div>
+<div class="draggable" draggable="true">Cyber Warfare</div>
+<div class="draggable" draggable="true">Sniper Deployment</div>
+<div class="draggable" draggable="true">Reconnaissance</div>
+<div class="draggable" draggable="true">Overwatch</div>
+<div class="draggable" draggable="true">Suppression Fire</div>
+<div class="draggable" draggable="true">Bounding Overwatch</div>
+<div class="draggable" draggable="true">Breach and Clear</div>
+<div class="draggable" draggable="true">Amphibious Assault</div>
+<div class="draggable" draggable="true">Vertical Envelopment</div>
+<div class="draggable" draggable="true">Defensive Perimeter</div>
+<div class="draggable" draggable="true">Strategic Bombing</div>
+<div class="draggable" draggable="true">Counter-Offensive</div>
+<div class="draggable" draggable="true">Counter-Insurgency</div>
+<div class="draggable" draggable="true">Area Denial</div>
+<div class="draggable" draggable="true">Forward Operating Base</div>
+<div class="draggable" draggable="true">Force Concentration</div>
+<div class="draggable" draggable="true">Elastic Defense</div>
+<div class="draggable" draggable="true">Mobile Warfare</div>
+<div class="draggable" draggable="true">Trench Warfare</div>
+<div class="draggable" draggable="true">Line Formation</div>
+<div class="draggable" draggable="true">Cavalry Charge</div>
+<div class="draggable" draggable="true">Drone Reconnaissance</div>
+<div class="draggable" draggable="true">Kamikaze Tactics</div>
+<div class="draggable" draggable="true">Island Hopping</div>
+<div class="draggable" draggable="true">No-Fly Zone Enforcement</div>
+<div class="draggable" draggable="true">False Flag Operation</div>
+<div class="draggable" draggable="true">Strategic Withdrawal</div>
+<div class="draggable" draggable="true">Preemptive Strike</div>
+<div class="draggable" draggable="true">Demoralization Campaign</div>
+<div class="draggable" draggable="true">Sabotage</div>
+    </div>
+  </div>
+
+  <div>
+    <strong>Tactics Used</strong>
+    <div class="box" id="used-tactics" ondragover="event.preventDefault()" ondrop="drop(event)">
+      <!-- Dropped tactics will appear here -->
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button onclick="downloadTxt()">Download as .txt</button>
+  <button onclick="downloadPDF()">Download as .pdf</button>
+</div>
+
+<script>
+  let dragged;
+  document.querySelectorAll('.draggable').forEach(elem => {
+    elem.addEventListener('dragstart', (e) => {
+      dragged = e.target;
+    });
+  });
+
+  function drop(event) {
+    event.preventDefault();
+    const clone = dragged.cloneNode(true);
+    const targetBox = document.getElementById("used-tactics");
+
+    // Avoid duplicates
+    const exists = Array.from(targetBox.children).some(el => el.textContent === clone.textContent);
+    if (!exists) {
+      // Add delete-on-click functionality
+      clone.addEventListener('click', () => clone.remove());
+      targetBox.appendChild(clone);
+    }
+  }
+
+  function collectData() {
+    const tacticsUsed = Array.from(document.getElementById("used-tactics").children)
+      .map(el => el.textContent.trim()).join(', ');
+
+    return {
+      operation: document.getElementById("operation").value,
+      commander: document.getElementById("commander").value,
+      location: document.getElementById("location").value,
+      date: document.getElementById("date").value,
+      units: document.getElementById("units").value,
+      objective: document.getElementById("objective").value,
+      weather: document.getElementById("weather").value,
+      duration: document.getElementById("duration").value,
+      casualties: document.getElementById("casualties").value,
+      outcome: document.getElementById("outcome").value,
+      notes: document.getElementById("notes").value,
+      tactics: tacticsUsed
+    };
+  }
+
+  function formatReport(data) {
+    return `--- MILITARY OPERATION REPORT ---
+
+Operation Name: ${data.operation}
+Commanding Officer: ${data.commander}
+Location: ${data.location}
+Date: ${data.date}
+Units Involved: ${data.units}
+Objective: ${data.objective}
+Weather: ${data.weather}
+Duration: ${data.duration}
+Casualties: ${data.casualties}
+Outcome: ${data.outcome}
+
+Tactics Used: ${data.tactics}
+
+Additional Notes:
+${data.notes}
+`;
+  }
+
+  function downloadTxt() {
+    const data = collectData();
+    const text = formatReport(data);
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${data.operation || "battle_report"}.txt`;
+    link.click();
+  }
+
+  async function downloadPDF() {
+    const data = collectData();
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const lines = formatReport(data).split('\n');
+    lines.forEach((line, i) => doc.text(line, 10, 10 + i * 8));
+    doc.save(`${data.operation || "battle_report"}.pdf`);
+  }
+</script>
+
+</body>
+</html>

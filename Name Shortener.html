@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Name Shortener</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 8px; margin-top: 10px; width: 300px; }
+    #result { margin-top: 15px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h2>Name Shortener</h2>
+<input type="text" id="nameInput" placeholder="Enter name (e.g., Realms Tempest)" />
+<button onclick="shortenName()">Shorten</button>
+
+<div id="result"></div>
+
+<script>
+  function shortenWord(word) {
+    // Remove vowels except the first letter, and make it uppercase
+    return word.toUpperCase().replace(/[AEIOU]/g, '');
+  }
+
+  function shortenName() {
+    const input = document.getElementById('nameInput').value.trim();
+    if (!input) {
+      document.getElementById('result').innerText = 'Please enter a name.';
+      return;
+    }
+
+    const words = input.split(/\s+/);
+    const shortened = words.map(shortenWord).join(' ');
+    document.getElementById('result').innerText = `Shortened: ${shortened}`;
+  }
+</script>
+
+</body>
+</html>

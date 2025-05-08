@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Text UML Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background-color: #f0f0f0;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 1rem;
+      font-family: monospace;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+    pre {
+      background: #fff;
+      padding: 1rem;
+      white-space: pre-wrap;
+      border-radius: 10px;
+      margin-top: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>Java to Text UML</h1>
+  <textarea id="javaInput" placeholder="Paste Java class here..."></textarea>
+  <br>
+  <button onclick="generateTextUML()">Generate</button>
+  <pre id="umlOutput"></pre>
+
+  <script>
+    function generateTextUML() {
+      const javaCode = document.getElementById("javaInput").value;
+      const className = javaCode.match(/class\s+(\w+)/)?.[1] || "UnknownClass";
+
+      const fields = [...javaCode.matchAll(/(private|public|protected)?\s*(\w+(<.*?>)?)\s+(\w+);/g)]
+        .map(m => `- ${m[4]} : ${m[2]}`);
+
+      const methods = [...javaCode.matchAll(/(public|protected|private)?\s+(\w+(<.*?>)?)\s+(\w+)\s*\(([^)]*)\)/g)]
+        .map(m => {
+          const methodName = m[4];
+          const returnType = m[2];
+          const params = m[5]
+            .split(',')
+            .map(p => p.trim().split(' ').slice(-2).join(' '))
+            .filter(p => p.length)
+            .join(', ');
+          return `+ ${methodName}(${params})${returnType !== 'void' ? ' : ' + returnType : ''}`;
+        });
+
+      const umlLines = [className, ...fields, "", ...methods];
+
+      document.getElementById("umlOutput").textContent = umlLines.join("\n");
+    }
+  </script>
+</body>
+</html>

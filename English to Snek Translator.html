@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Snek Translator</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background-color: #fefbd8;
+      color: #333;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #2e8b57;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      font-size: 1rem;
+      padding: 10px;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #b0f2b6;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 8px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #a0e6a5;
+    }
+    .output {
+      margin-top: 1rem;
+      background-color: #fff;
+      padding: 1rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🐍 Snek <-> English Translator</h1>
+
+  <textarea id="inputText" placeholder="Type English or Snek here..."></textarea><br>
+  <button onclick="translateToSnek()">To Snek 🐍</button>
+  <button onclick="translateToEnglish()">To English 🗣️</button>
+
+  <div class="output" id="outputText"></div>
+
+  <script>
+    const rulesToSnek = [
+      [/\bmy name is\b/gi, "my naem is"],
+      [/\bi am\b/gi, "i be"],
+      [/\bi'm\b/gi, "i be"],
+      [/\bi have\b/gi, "i hav"],
+      [/\bi want to\b/gi, "i wants to"],
+      [/\bi want\b/gi, "i wants"],
+      [/\bhello\b|\bhi\b/gi, "hi"],
+      [/\bthe\b/gi, "da"],
+      [/\bthis\b/gi, "dis"],
+      [/\bthat\b/gi, "dat"],
+      [/\bthere is\b/gi, "thers"],
+      [/\bis\b/gi, "be"],
+      [/\bare\b/gi, "be"],
+      [/\bwith\b/gi, "wit"],
+      [/\band\b/gi, "an"],
+      [/\byou\b/gi, "yu"],
+      [/\byour\b/gi, "ur"],
+      [/\bhave\b/gi, "hav"],
+      [/\bhas\b/gi, "hav"],
+      [/\bwas\b/gi, "was"],
+      [/\bwere\b/gi, "was"],
+      [/\bwhat\b/gi, "wut"],
+      [/\bgood\b/gi, "gud"],
+      [/\bbad\b/gi, "nuh uh"],
+      [/\bfood\b/gi, "snak"],
+      [/\bbread\b/gi, "bred"],
+      [/\blike\b/gi, "liek"],
+      [/\bsmall\b/gi, "smol"],
+      [/\blittle\b/gi, "smol"],
+      [/\bbig\b/gi, "beeg"],
+      [/\bstrong\b/gi, "stronk"],
+      [/\bhead\b/gi, "hed"],
+      [/\bmouth\b/gi, "mouf"],
+      [/\beat\b/gi, "mounch"],
+      [/\bknow\b/gi, "kno"],
+      [/\bgrow\b/gi, "gro"],
+      [/\brun\b/gi, "slither zoomy"],
+      [/\bwalk\b/gi, "slither"],
+      [/\bgo\b/gi, "slither"],
+      [/\bexplore\b/gi, "explor"],
+      [/\badventure\b/gi, "fra travs"],
+      [/\brock\b/gi, "rok"],
+      [/\bsun\b/gi, "soune"],
+      [/\bbetter\b/gi, "betr"],
+      [/\bwater\b/gi, "watre"],
+      [/\bfrom\b/gi, "ferom"],
+      [/\bbird\b/gi, "birb"],
+      [/\bcute\b/gi, "coote"],
+      [/\btree\b/gi, "treh"],
+      [/\bnight\b/gi, "nite"],
+      [/\blight\b/gi, "lite"],
+      [/\bfriends?\b/gi, "fren"],
+      [/\bsleep\b/gi, "sneep"],
+      [/\bdream\b/gi, "dreem"],
+      [/\bhome\b/gi, "hoem"],
+      [/\bdanger\b/gi, "scary thing"],
+      [/\bhappy\b/gi, "happi"],
+      [/\blove\b/gi, "luv"],
+      [/\bno\b/gi, "nuh"],
+      [/\byes\b/gi, "yiss"],
+      [/\bfast\b/gi, "zoomy"],
+      [/\bslow\b/gi, "sloo"],
+      [/\blisten\b/gi, "lissen"],
+      [/\bbeneath\b/gi, "under"],
+	  [/\bworld\b/gi, "beeg plas"],
+	  [/\bsnake\b/gi, "snek"]
+    ];
+
+    const rulesToEnglish = [
+      [/\bmy naem is\b/gi, "my name is"],
+      [/\bi be\b/gi, "i am"],
+      [/\bi hav\b/gi, "i have"],
+      [/\bi wants to\b/gi, "i want to"],
+      [/\bi wants\b/gi, "i want"],
+      [/\bhi\b/gi, "hello"],
+      [/\bda\b/gi, "the"],
+      [/\bdis\b/gi, "this"],
+      [/\bdat\b/gi, "that"],
+      [/\bthers\b/gi, "there is"],
+      [/\bbe\b/gi, "is"],
+      [/\bwit\b/gi, "with"],
+      [/\ban\b/gi, "and"],
+      [/\byu\b/gi, "you"],
+      [/\bur\b/gi, "your"],
+      [/\bwas\b/gi, "was"],
+      [/\bwut\b/gi, "what"],
+      [/\bgud\b/gi, "good"],
+      [/\bnuh uh\b/gi, "bad"],
+      [/\bsnak\b/gi, "food"],
+      [/\bbred\b/gi, "bread"],
+      [/\bliek\b/gi, "like"],
+      [/\bsmol\b/gi, "small"],
+      [/\bbeeg\b/gi, "big"],
+      [/\bstronk\b/gi, "strong"],
+      [/\bhed\b/gi, "head"],
+      [/\bmouf\b/gi, "mouth"],
+      [/\bmounch\b/gi, "eat"],
+      [/\bkno\b/gi, "know"],
+      [/\bgro\b/gi, "grow"],
+      [/\bslither zoomy\b/gi, "run"],
+      [/\bslither\b/gi, "go"],
+      [/\bexplor\b/gi, "explore"],
+      [/\bfra travs\b/gi, "adventure"],
+      [/\brok\b/gi, "rock"],
+      [/\bsoune\b/gi, "sun"],
+      [/\bbetr\b/gi, "better"],
+      [/\bwatre\b/gi, "water"],
+      [/\bferom\b/gi, "from"],
+      [/\bbirb\b/gi, "bird"],
+      [/\bcoote\b/gi, "cute"],
+      [/\btreh\b/gi, "tree"],
+      [/\bnite\b/gi, "night"],
+      [/\blite\b/gi, "light"],
+      [/\bfren\b/gi, "friend"],
+      [/\bsneep\b/gi, "sleep"],
+      [/\bdreem\b/gi, "dream"],
+      [/\bhoem\b/gi, "home"],
+      [/\bscary thing\b/gi, "danger"],
+      [/\bhappi\b/gi, "happy"],
+      [/\bluv\b/gi, "love"],
+      [/\bnuh\b/gi, "no"],
+      [/\byiss\b/gi, "yes"],
+      [/\bzoomy\b/gi, "fast"],
+      [/\bsloo\b/gi, "slow"],
+      [/\blissen\b/gi, "listen"],
+      [/\bunder\b/gi, "beneath"],
+	  [/\bbeeg plas\b/gi, "world"],
+	  [/\bsnek\b/gi, "snake"]
+    ];
+
+    function applyRules(text, rules) {
+      let output = text;
+      rules.forEach(([pattern, replacement]) => {
+        output = output.replace(pattern, replacement);
+      });
+      return output;
+    }
+
+    function translateToSnek() {
+      const input = document.getElementById('inputText').value;
+      const snekified = applyRules(input, rulesToSnek);
+      document.getElementById('outputText').innerText = snekified;
+    }
+
+    function translateToEnglish() {
+      const input = document.getElementById('inputText').value;
+      const englishified = applyRules(input, rulesToEnglish);
+      document.getElementById('outputText').innerText = englishified;
+    }
+  </script>
+
+</body>
+</html>

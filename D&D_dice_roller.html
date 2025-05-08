@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://fonts.googleapis.com/css2?family=Uncial+Antiqua&display=swap" rel="stylesheet">
+    <title>D&D Dice Roller</title>
+    <style>
+        body {
+    font-family: 'Uncial Antiqua', 'Garamond', serif;
+    background: url('https://www.transparenttextures.com/patterns/old-mathematics.png') repeat, #f3f0e6;
+    color: #4b2e2e;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    background-size: cover;
+	}
+
+	h1 {
+    font-size: 2.5em;
+    letter-spacing: 2px;
+    text-shadow: 1px 1px 0 #e7e0c4;
+    margin-bottom: 0.5em;
+	}
+
+	button {
+    font-family: 'Garamond', serif;
+    background-color: #d2b48c;
+    border: 2px solid #5a3e1b;
+    color: #4b2e2e;
+    border-radius: 0;
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, 0.2);
+    font-weight: bold;
+    transition: transform 0.2s, background-color 0.3s;
+	}
+
+	button:hover {
+    background-color: #c2a676;
+    transform: scale(1.05);
+	}
+
+	#result, #history {
+    font-style: italic;
+    font-family: 'Courier New', monospace;
+    border: 2px dashed #5a3e1b;
+    background-color: rgba(255, 255, 255, 0.85);
+	}
+
+	footer {
+    font-family: 'Garamond', serif;
+    font-style: italic;
+    margin-top: 40px;
+	}
+
+	a {
+    text-decoration: underline dotted;
+    color: #4b2e2e;
+	}
+	
+	.scroll-frame {
+    border: 15px solid #8b5e3c;
+    padding: 20px;
+    background-color: #f9f7ed;
+    max-width: 1000px;
+    margin: auto;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+	}
+	
+    </style>
+</head>
+<body>
+	<div class="scroll-frame">
+		<h1>D&D Dice Roller</h1>
+		<div id="buttons-container">
+			<button onclick="rollDice(1)">Roll d1</button>
+			<button onclick="rollDice(4)">Roll d4</button>
+			<button onclick="rollDice(6)">Roll d6</button>
+			<button onclick="rollDice(8)">Roll d8</button>
+			<button onclick="rollDice(10)">Roll d10</button>
+			<button onclick="rollDice(12)">Roll d12</button>
+			<button onclick="rollDice(20)">Roll d20</button>
+			<button onclick="rollDice(25)">Roll d25</button>
+			<button onclick="rollDice(30)">Roll d30</button>
+			<button onclick="rollDice(35)">Roll d35</button>
+			<button onclick="rollDice(40)">Roll d40</button>
+			<button onclick="rollDice(45)">Roll d45</button>
+			<button onclick="rollDice(50)">Roll d50</button>
+			<button onclick="rollDice(55)">Roll d55</button>
+			<button onclick="rollDice(60)">Roll d60</button>
+			<button onclick="rollDice(65)">Roll d65</button>
+			<button onclick="rollDice(70)">Roll d70</button>
+			<button onclick="rollDice(75)">Roll d75</button>
+			<button onclick="rollDice(80)">Roll d80</button>
+			<button onclick="rollDice(85)">Roll d85</button>
+			<button onclick="rollDice(90)">Roll d90</button>
+			<button onclick="rollDice(95)">Roll d95</button>
+			<button onclick="rollDice(100)">Roll d100</button>
+			<button onclick="rollDice(105)">Roll d105</button>
+			<button onclick="rollDice(110)">Roll d110</button>
+			<button onclick="rollDice(115)">Roll d115</button>
+			<button onclick="rollDice(120)">Roll d120</button>
+			<button onclick="rollDice(125)">Roll d125</button>
+			<button onclick="rollDice(130)">Roll d130</button>
+			<button onclick="rollDice(135)">Roll d135</button>
+			<button onclick="rollDice(140)">Roll d140</button>
+			<button onclick="rollDice(145)">Roll d145</button>
+			<button onclick="rollDice(150)">Roll d150</button>
+			<button onclick="rollDice(155)">Roll d155</button>
+			<button onclick="rollDice(160)">Roll d160</button>
+			<button onclick="rollDice(165)">Roll d165</button>
+			<button onclick="rollDice(170)">Roll d170</button>
+			<button onclick="rollDice(175)">Roll d175</button>
+			<button onclick="rollDice(180)">Roll d180</button>
+			<button onclick="rollDice(185)">Roll d185</button>
+			<button onclick="rollDice(190)">Roll d190</button>
+			<button onclick="rollDice(195)">Roll d195</button>
+			<button onclick="rollDice(200)">Roll d200</button>
+			<button onclick="rollDice(205)">Roll d205</button>
+			<button onclick="rollDice(210)">Roll d210</button>
+			<button onclick="rollDice(215)">Roll d215</button>
+			<button onclick="rollDice(220)">Roll d220</button>
+			<button onclick="rollDice(225)">Roll d225</button>
+			<button onclick="rollDice(230)">Roll d230</button>
+			<button onclick="rollDice(235)">Roll d235</button>
+			<button onclick="rollDice(240)">Roll d240</button>
+			<button onclick="rollDice(245)">Roll d245</button>
+			<button onclick="rollDice(250)">Roll d250</button>
+			<button onclick="rollDice(255)">Roll d255</button>
+			<button onclick="rollDice(260)">Roll d260</button>
+			<button onclick="rollDice(265)">Roll d265</button>
+			<button onclick="rollDice(270)">Roll d270</button>
+			<button onclick="rollDice(275)">Roll d275</button>
+			<button onclick="rollDice(280)">Roll d280</button>
+			<button onclick="rollDice(285)">Roll d285</button>
+			<button onclick="rollDice(290)">Roll d290</button>
+			<button onclick="rollDice(295)">Roll d295</button>
+			<button onclick="rollDice(300)">Roll d300</button>
+			<button onclick="rollDice(301)">Roll d301</button>
+		</div>
+
+		<div id="result">Roll a die to see the result!</div>
+		<div id="history">Roll history will be shown here: </div>
+
+		<button onclick="resetResult()" aria-label="Reset the result">Reset</button>
+
+		<footer>
+			<a href="https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode.txt" target="_blank">Creative Commons License</a>
+		</footer>
+</div>
+
+    <script>
+        function rollDice(sides) {
+            const result = Math.floor(Math.random() * sides) + 1;
+            document.getElementById('result').innerText = `You rolled a d${sides} and got a ${result}`;
+            
+            // Append result to history
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML += `You rolled a d${sides} and got a ${result}<br>`;
+        }
+
+        function resetResult() {
+            document.getElementById('result').innerText = 'Roll a die to see the result!';
+            document.getElementById('history').innerHTML = 'Roll history will be shown here: ';
+        }
+    </script>
+</body>
+</html>

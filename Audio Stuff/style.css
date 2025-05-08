@@ -1,0 +1,79 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f5f5f5;
+  color: #333;
+}
+
+#dropZone {
+  padding: 20px;
+  border: 2px dashed #aaa;
+  text-align: center;
+  margin: 20px;
+  cursor: pointer;
+  background: #fff;
+  transition: background 0.3s;
+}
+
+#dropZone.dragover {
+  background: #e0e0ff;
+}
+
+audio,
+video {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 10px;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  display: block;
+  margin: 10px 0;
+}
+
+#fileInfo, #metadata {
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  overflow-wrap: break-word;
+}
+
+.file-button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  font-size: 1rem;
+  margin: 5px 0;
+  border: none;
+  background-color: #ddd;
+  cursor: pointer;
+}
+
+.file-button:hover,
+.file-button:focus {
+  background-color: #ccc;
+  outline: 2px solid #666;
+}
+
+#playbackRate {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  #dropZone {
+    max-width: 600px;
+    margin: 20px auto;
+  }
+
+  #fileInfo, #metadata {
+    max-width: 600px;
+    margin: auto;
+  }
+
+  .file-button {
+    width: auto;
+  }
+}

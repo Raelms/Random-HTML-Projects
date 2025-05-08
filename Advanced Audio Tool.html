@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audio Toolkit</title>
+  
+  <!-- Add jsmediatags library to read metadata -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js" onerror="alert('Error loading jsmediatags library!');"></script>
+  
+  <!-- Add WaveSurfer.js for waveform visualization -->
+  <script src="https://unpkg.com/wavesurfer.js" onerror="alert('Error loading WaveSurfer.js library!');"></script>
+  
+  
+  
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+    #waveform, #spectrogramCanvas, #frequencyCanvas {
+      width: 100%; margin: 1em 0; background: #000;
+    }
+    canvas { display: block; height: 100px; }
+    pre { background: #eee; padding: 10px; white-space: pre-wrap; }
+    #dropZone { border: 2px dashed #aaa; padding: 20px; text-align: center; background: #fafafa; }
+    input[type="range"] { width: 100%; }
+  </style>
+</head>
+<body>
+
+<h1>🎵 Audio Analysis Toolkit</h1>
+
+<!-- Drag & Drop Zone -->
+<div id="dropZone" aria-label="Drag and drop audio files here for processing.">Drop audio files here</div>
+
+<!-- File input to upload audio -->
+<input type="file" id="fileInput" accept="audio/*" multiple aria-label="Select audio files to upload" />
+<div id="fileInfo"></div>
+
+<h3>Audio Player</h3>
+<audio id="audioPlayer" controls aria-label="Audio player control"></audio>
+
+<h3>Waveform</h3>
+<div id="waveform" aria-label="Audio waveform display"></div>
+
+<h3>Spectrogram (Simple)</h3>
+<canvas id="spectrogramCanvas" aria-label="Audio spectrogram visualization"></canvas>
+
+<h3>Frequency Spectrum</h3>
+<canvas id="frequencyCanvas" aria-label="Audio frequency spectrum visualization"></canvas>
+
+<h3>Metadata</h3>
+<pre id="metadata">No file loaded.</pre>
+
+<h3>Edit Metadata</h3>
+<label for="metaTitle">Title: <input id="metaTitle" aria-label="Edit song title" /></label><br />
+<label for="metaArtist">Artist: <input id="metaArtist" aria-label="Edit artist name" /></label><br />
+<label for="metaAlbum">Album: <input id="metaAlbum" aria-label="Edit album name" /></label><br />
+<button onclick="applyMetadata()" aria-label="Apply metadata changes">Apply</button>
+
+<h3>Playback Control</h3>
+<label for="playbackRate">Speed: <input id="playbackRate" type="range" min="0.5" max="2" step="0.1" value="1" aria-label="Adjust playback speed" /></label>
+<span id="rateLabel">1x</span>
+
+<br />
+
+<label for="outputFormat">Select output format:</label>
+<select id="outputFormat" aria-label="Select output file format">
+  <option value="mp3">MP3</option>
+  <option value="wav">WAV</option>
+  <option value="flac">FLAC</option>
+  <option value="aac">AAC</option>
+  <option value="ogg">OGG</option>
+  <option value="opus">Opus</option>
+  <option value="alac">ALAC (Apple Lossless)</option>
+  <option value="aiff">AIFF</option>
+  <option value="wma">WMA</option>
+  <option value="m4a">M4A</option>
+  <option value="ac3">AC3</option>
+  <option value="amr">AMR (Adaptive Multi-Rate)</option>
+  <option value="pcm">PCM (Raw)</option>
+  <option value="caf">CAF (Core Audio Format)</option>
+  <option value="gsm">GSM</option>
+  <option value="au">AU (Sun/NeXT)</option>
+  <option value="vox">VOX (Dialogic ADPCM)</option>
+  <option value="ra">RA (RealAudio)</option>
+  <option value="rm">RM (RealMedia)</option>
+  <option value="8svx">8SVX (Amiga)</option>
+  <option value="aax">AAX (Audible DRM – not supported without special tools)</option>
+  <option value="m4p">M4P (Protected AAC – DRM)</option>
+</select>
+
+<br />
+
+<button id="convertButton" aria-label="Convert selected file to a different format">Convert</button>
+
+<div id="convertedFile"></div>
+
+<script>
+  // Declare references to elements
+  const fileInput = document.getElementById('fileInput');
+  const audioPlayer = document.getElementById('audioPlayer');
+  const fileInfo = document.getElementById('fileInfo');
+  const metadataDiv = document.getElementById('metadata');
+
+  // WaveSurfer instance for waveform display (visual only)
+  const waveform = WaveSurfer.create({
+    container: '#waveform',
+    waveColor: 'violet',
+    progressColor: 'purple',
+    interact: false, // disable click/seek
+    backend: 'MediaElement',
+    mediaControls: false,
+    media: audioPlayer // bind to existing audio player
+  });
+
+  // Handle file upload and process metadata
+  fileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      alert("No file selected. Please select an audio file.");
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+
+    try {
+      // Attempt to load the file into the audio player and waveform
+      audioPlayer.src = url;
+      waveform.load(url);
+
+      // Display file info
+      fileInfo.innerHTML = `
+        <p><strong>File:</strong> ${file.name}</p>
+        <p><strong>Size:</strong> ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+      `;
+      
+      // Extract metadata
+      new jsmediatags.Reader(file).setTagsToRead(["title", "artist", "album", "track", "disk"]).read({
+        onSuccess: function(tag) {
+          const metadata = tag.tags;
+          updateMetadata(metadata);
+        },
+        onError: function(error) {
+          console.error(error);
+          metadataDiv.textContent = 'Failed to read metadata: ' + error.message;
+        }
+      });
+
+      // Generate spectrogram on load
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await file.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      drawSpectrogram(audioBuffer);
+    } catch (error) {
+      console.error("File load failed:", error);
+      alert("An error occurred while loading the file. Please try again.");
+    }
+  });
+  
+  // Frequency Spectrum (real-time FFT)
+function visualizeFrequency(audio) {
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+
+  const source = audioCtx.createMediaElementSource(audio);
+  const analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 1024; // Increased fftSize for more bars
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);  // This connects to the speakers, if needed
+
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  // Set the canvas size
+  const canvas = document.getElementById('frequencyCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth;
+  canvas.height = 100;
+
+  // Create a color gradient
+  const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  gradient.addColorStop(0, 'blue');
+  gradient.addColorStop(0.5, 'green');
+  gradient.addColorStop(1, 'red');
+
+  function draw() {
+    analyser.getByteFrequencyData(dataArray);
+
+    // Clear the canvas before drawing new frame
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const barWidth = (canvas.width / bufferLength) * 2.5; // Adjust width for more bars
+    let x = 0;
+
+    // Draw each frequency bar on the canvas with gradient color
+    for (let i = 0; i < bufferLength; i++) {
+      const barHeight = dataArray[i];
+      
+      // Color intensity based on frequency amplitude
+      const colorIntensity = Math.min(255, barHeight);
+      ctx.fillStyle = gradient;
+
+      // Draw the bar with the calculated color
+      ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+      x += barWidth + 1; // Move to the next position
+    }
+
+    // Request the next frame for smooth animation
+    requestAnimationFrame(draw);
+  }
+
+  // Start the drawing process
+  draw();
+}
+
+// Visualize frequency data when the audio starts playing
+audioPlayer.addEventListener('play', () => {
+  visualizeFrequency(audioPlayer);
+});
+
+  // Throttled spectrogram draw function
+  let lastDrawTime = 0;
+  function throttleDraw() {
+    const now = Date.now();
+    if (now - lastDrawTime > 50) { // Throttle at 50ms intervals
+      drawSpectrogram(audioBuffer);
+      lastDrawTime = now;
+    }
+  }
+
+  // Optimized spectrogram with color gradient
+  function drawSpectrogram(audioBuffer) {
+    const canvas = document.getElementById('spectrogramCanvas');
+    const ctx = canvas.getContext('2d');
+    const data = audioBuffer.getChannelData(0);
+    const step = 512;
+    canvas.width = Math.ceil(data.length / step);
+    canvas.height = 100;
+
+    for (let i = 0; i < data.length; i += step) {
+      const slice = data.slice(i, i + step);
+      const avg = slice.reduce((sum, val) => sum + Math.abs(val), 0) / step;
+      const intensity = Math.min(255, Math.floor(avg * 5000));
+
+      // Color gradient
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+      gradient.addColorStop(0, `rgb(${intensity}, 0, 0)`);
+      gradient.addColorStop(1, `rgb(0, ${intensity}, 0)`);
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(i / step, 0, 1, canvas.height);
+    }
+  }
+
+  // Update metadata with throttling
+  let metadataUpdateTimeout;
+  function updateMetadata(metadata) {
+    clearTimeout(metadataUpdateTimeout);
+    metadataUpdateTimeout = setTimeout(() => {
+      metadataDiv.textContent = JSON.stringify(metadata, null, 2);
+    }, 200); // Delay updates
+  }
+  
+  // Enable drag-and-drop file support
+const dropArea = document.getElementById('dropArea') || document.body;
+
+['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.add('dragover');
+  }, false);
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.classList.remove('dragover');
+  }, false);
+});
+
+dropArea.addEventListener('drop', (e) => {
+  const file = e.dataTransfer.files[0];
+  if (file) {
+    // Simulate file input change
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    fileInput.files = dataTransfer.files;
+
+    // Trigger the same event as manual selection
+    const changeEvent = new Event('change', { bubbles: true });
+    fileInput.dispatchEvent(changeEvent);
+  }
+});
+</script>
+
+</body>
+</html>

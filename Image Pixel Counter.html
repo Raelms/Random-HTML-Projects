@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pixel Counter Pro++ Ultra</title>
+<style>
+  :root {
+    --bg-color: #121212;
+    --text-color: #eee;
+    --panel-bg: #1f1f1f;
+    --highlight-color: #00ffff;
+    --accent-color: #00ffaa;
+    --zoom-border: #ff00ff;
+  }
+  body.light {
+    --bg-color: #ffffff;
+    --text-color: #111111;
+    --panel-bg: #f0f0f0;
+    --highlight-color: #0077ff;
+    --accent-color: #00aa7f;
+    --zoom-border: #cc00cc;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    transition: background 0.5s, color 0.5s;
+  }
+  h2 {
+    color: var(--highlight-color);
+    margin-bottom: 10px;
+  }
+  #controls {
+    background: var(--panel-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px var(--highlight-color);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  label {
+    margin-right: 5px;
+    color: var(--text-color);
+  }
+  select, input[type="file"], button {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--highlight-color);
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  #output {
+    background: var(--panel-bg);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px var(--highlight-color);
+    width: 80%;
+    margin-bottom: 20px;
+    font-size: 1rem;
+  }
+  strong {
+    color: var(--accent-color);
+  }
+  #mainWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    position: relative;
+  }
+  #canvasWrapper {
+    position: relative;
+    border: 2px solid var(--highlight-color);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+  }
+  canvas {
+    display: block;
+    cursor: crosshair;
+  }
+  #zoomCanvas {
+    border: 2px solid var(--zoom-border);
+    background: #111;
+    box-shadow: 0 0 15px var(--zoom-border);
+    pointer-events: none;
+    width: 100px;
+    height: 100px;
+    transition: width 0.3s, height 0.3s;
+  }
+  #colorInfo {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: var(--accent-color);
+  }
+</style>
+</head>
+<body>
+
+<h2>🖼️ Pixel Counter Pro++ Ultra</h2>
+
+<div id="controls">
+  <input type="file" id="upload" accept="image/*">
+  
+  <div>
+    <label for="unit">Unit:</label>
+    <select id="unit">
+      <option value="bit">Bit</option>
+      <option value="byte">Byte</option>
+    </select>
+  </div>
+  
+  <div>
+    <label for="size">Size:</label>
+    <select id="size">
+      <option value="1">1</option>
+      <option value="4">4</option>
+      <option value="8">8</option>
+      <option value="16">16</option>
+      <option value="32">32</option>
+      <option value="64">64</option>
+      <option value="128">128</option>
+      <option value="256">256</option>
+      <option value="512">512</option>
+      <option value="1024">1024</option>
+      <option value="2048">2048</option>
+      <option value="4096">4096</option>
+    </select>
+  </div>
+  
+  <button id="toggleMode">🌒/☀️ Mode</button>
+  <button id="zoomToggle">🔍 Zoom x2</button>
+  <button id="saveMeasurements">💾 Save</button>
+</div>
+
+<div id="output">Upload an image to start measuring.</div>
+<div id="colorInfo">Hover to inspect pixel color.</div>
+
+<div id="mainWrapper">
+  <div id="canvasWrapper">
+    <canvas id="canvas"></canvas>
+  </div>
+  <canvas id="zoomCanvas" width="100" height="100"></canvas>
+</div>
+
+<script>
+const upload = document.getElementById('upload');
+const canvas = document.getElementById('canvas');
+const zoomCanvas = document.getElementById('zoomCanvas');
+const ctx = canvas.getContext('2d');
+const zoomCtx = zoomCanvas.getContext('2d');
+const output = document.getElementById('output');
+const unitSelect = document.getElementById('unit');
+const sizeSelect = document.getElementById('size');
+const toggleModeBtn = document.getElementById('toggleMode');
+const zoomToggleBtn = document.getElementById('zoomToggle');
+const saveBtn = document.getElementById('saveMeasurements');
+const colorInfo = document.getElementById('colorInfo');
+
+let img = new Image();
+let startX, startY, endX, endY;
+let isDragging = false;
+let imgWidth = 0;
+let imgHeight = 0;
+let measurements = '';
+let zoomBig = false;
+
+upload.addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    img = new Image();
+    img.onload = function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      imgWidth = img.width;
+      imgHeight = img.height;
+      calculate(imgWidth, imgHeight);
+    }
+    img.src = event.target.result;
+  }
+  reader.readAsDataURL(file);
+});
+
+unitSelect.addEventListener('change', () => {
+  if (imgWidth && imgHeight) calculate(imgWidth, imgHeight);
+});
+sizeSelect.addEventListener('change', () => {
+  if (imgWidth && imgHeight) calculate(imgWidth, imgHeight);
+});
+
+toggleModeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('light');
+});
+
+zoomToggleBtn.addEventListener('click', () => {
+  zoomBig = !zoomBig;
+  if (zoomBig) {
+    zoomCanvas.style.width = '200px';
+    zoomCanvas.style.height = '200px';
+    zoomToggleBtn.innerText = '🔍 Zoom x1';
+  } else {
+    zoomCanvas.style.width = '100px';
+    zoomCanvas.style.height = '100px';
+    zoomToggleBtn.innerText = '🔍 Zoom x2';
+  }
+});
+
+saveBtn.addEventListener('click', () => {
+  const blob = new Blob([measurements], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'measurements.txt';
+  a.click();
+});
+
+function calculate(width, height) {
+  const unit = unitSelect.value;
+  const size = parseInt(sizeSelect.value);
+  const totalPixels = width * height;
+  let totalBits = unit === 'bit' ? totalPixels * size : totalPixels * size * 8;
+  let totalBytes = totalBits / 8;
+
+  const text = `
+Image Width: ${width} px
+Image Height: ${height} px
+Total Pixels: ${totalPixels}
+Selected Unit: ${size} ${unit === 'bit' ? 'bits' : 'bytes'} per pixel
+Total ${unit === 'bit' ? 'Bits' : 'Bytes'}: ${unit === 'bit' ? totalBits : totalBytes}
+`;
+
+  output.innerHTML = text.replace(/\n/g, '<br>');
+  measurements = text;
+}
+
+canvas.addEventListener('mousedown', function(e) {
+  startX = e.offsetX;
+  startY = e.offsetY;
+  isDragging = true;
+});
+
+canvas.addEventListener('mousemove', function(e) {
+  if (isDragging) {
+    endX = e.offsetX;
+    endY = e.offsetY;
+    redraw();
+    drawSelection();
+  }
+  drawZoom(e.offsetX, e.offsetY);
+  inspectColor(e.offsetX, e.offsetY);
+});
+
+canvas.addEventListener('mouseup', function(e) {
+  isDragging = false;
+  endX = e.offsetX;
+  endY = e.offsetY;
+  redraw();
+  drawSelection();
+  measureSelection();
+});
+
+canvas.addEventListener('click', function(e) {
+  if (!isDragging && (startX !== undefined && endX !== undefined)) {
+    const rect = canvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+    if (clickX < Math.min(startX, endX) || clickX > Math.max(startX, endX) ||
+        clickY < Math.min(startY, endY) || clickY > Math.max(startY, endY)) {
+      startX = startY = endX = endY = undefined;
+      redraw();
+      output.innerHTML = measurements.replace(/\n/g, '<br>');
+    }
+  }
+});
+
+function redraw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0);
+}
+
+function drawSelection() {
+  ctx.beginPath();
+  ctx.strokeStyle = getComputedStyle(document.body).getPropertyValue('--accent-color');
+  ctx.lineWidth = 2;
+  ctx.rect(startX, startY, endX - startX, endY - startY);
+  ctx.stroke();
+}
+
+function measureSelection() {
+  let width = Math.abs(endX - startX);
+  let height = Math.abs(endY - startY);
+  if (width === 0 || height === 0) return;
+  const unit = unitSelect.value;
+  const size = parseInt(sizeSelect.value);
+  const totalPixels = width * height;
+  let totalBits = unit === 'bit' ? totalPixels * size : totalPixels * size * 8;
+  let totalBytes = totalBits / 8;
+
+  const extra = `
+Selected Area:
+Width: ${width} px
+Height: ${height} px
+Pixels: ${totalPixels}
+Size: ${unit === 'bit' ? totalBits + " Bits" : totalBytes + " Bytes"}
+`;
+
+  output.innerHTML = measurements.replace(/\n/g, '<br>') + '<br><br>' + extra.replace(/\n/g, '<br>');
+}
+
+function drawZoom(x, y) {
+  const zoom = 5;
+  const size = 10;
+  zoomCtx.clearRect(0, 0, zoomCanvas.width, zoomCanvas.height);
+  zoomCtx.imageSmoothingEnabled = false;
+  zoomCtx.drawImage(canvas, x - size/2, y - size/2, size, size, 0, 0, zoomCanvas.width, zoomCanvas.height);
+}
+
+function inspectColor(x, y) {
+  const pixel = ctx.getImageData(x, y, 1, 1).data;
+  const rgb = `rgb(${pixel[0]}, ${pixel[1]}, ${pixel[2]})`;
+  const hex = "#" + [pixel[0], pixel[1], pixel[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+  colorInfo.innerHTML = `Pixel Color: ${rgb} / ${hex}`;
+}
+</script>
+
+</body>
+</html>

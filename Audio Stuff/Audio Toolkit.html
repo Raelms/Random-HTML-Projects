@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio and Video Toolkit</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+  <script src="https://unpkg.com/wavesurfer.js"></script>
+</head>
+<body>
+
+<h1>🎵 Audio & 🎬 Video Toolkit</h1>
+
+<div id="dropZone" role="button" tabindex="0" aria-label="Drop audio or video files here">
+  Drop audio/video files here
+</div>
+
+<input type="file" id="fileInput" accept="audio/*,video/*" multiple aria-label="Select audio or video files" />
+<ul id="fileList" aria-label="Uploaded files list"></ul>
+<div id="fileInfo"></div>
+
+<h3>Audio Player</h3>
+<audio id="audioPlayer" controls></audio>
+
+<h3>Waveform (Audio)</h3>
+<div id="waveform"></div>
+
+<h3>Video Player</h3>
+<video id="videoPlayer" controls width="100%" style="max-height: 400px;"></video>
+
+<h3>Spectrogram</h3>
+<canvas id="spectrogramCanvas"></canvas>
+
+<h3>Frequency Spectrum</h3>
+<canvas id="frequencyCanvas"></canvas>
+
+<h3>Metadata</h3>
+<pre id="metadata">No file loaded.</pre>
+
+<label for="playbackRate">Speed: 
+  <input id="playbackRate" type="range" min="0.1" max="10" step="0.1" value="1" />
+</label>
+<span id="rateLabel">1x</span>
+
+<!-- <h3>Format Conversion</h3> -->
+<!-- <label for="outputFormat">Select output format:</label> -->
+<!-- <select id="outputFormat" aria-label="Select output file format"> -->
+  <!-- <optgroup label="Audio Formats"> -->
+  <!-- <option value="mp3">MP3</option> -->
+  <!-- <option value="wav">WAV</option> -->
+  <!-- <option value="flac">FLAC</option> -->
+  <!-- <option value="aac">AAC</option> -->
+  <!-- <option value="ogg">OGG</option> -->
+  <!-- <option value="opus">Opus</option> -->
+  <!-- <option value="alac">ALAC (Apple Lossless)</option> -->
+  <!-- <option value="aiff">AIFF</option> -->
+  <!-- <option value="wma">WMA</option> -->
+  <!-- <option value="m4a">M4A</option> -->
+  <!-- <option value="ac3">AC3</option> -->
+  <!-- <option value="amr">AMR (Adaptive Multi-Rate)</option> -->
+  <!-- <option value="pcm">PCM (Raw)</option> -->
+  <!-- <option value="caf">CAF (Core Audio Format)</option> -->
+  <!-- <option value="gsm">GSM</option> -->
+  <!-- <option value="au">AU (Sun/NeXT)</option> -->
+  <!-- <option value="vox">VOX (Dialogic ADPCM)</option> -->
+  <!-- <option value="ra">RA (RealAudio)</option> -->
+  <!-- <option value="rm">RM (RealMedia)</option> -->
+  <!-- <option value="8svx">8SVX (Amiga)</option> -->
+  <!-- <option value="aax">AAX (Audible DRM – not supported without special tools)</option> -->
+  <!-- <option value="m4p">M4P (Protected AAC – DRM)</option> -->
+  <!-- </optgroup> -->
+  <!-- <optgroup label="Video Formats"> -->
+    <!-- <option value="mp4">MP4</option> -->
+    <!-- <option value="webm">WebM</option> -->
+    <!-- <option value="ogg">Ogg</option> -->
+    <!-- <option value="mov">MOV</option> -->
+    <!-- <option value="avi">AVI</option> -->
+    <!-- <option value="flv">FLV</option> -->
+    <!-- <option value="mkv">MKV</option> -->
+    <!-- <option value="wmv">WMV</option> -->
+    <!-- <option value="3gp">3GP</option> -->
+    <!-- <option value="m4v">M4V</option> -->
+    <!-- <option value="ts">TS</option> -->
+    <!-- <option value="rm">RM</option> -->
+    <!-- <option value="mpg">MPG</option> -->
+    <!-- <option value="mpeg">MPEG</option> -->
+    <!-- <option value="dv">DV</option> -->
+    <!-- <option value="asf">ASF</option> -->
+    <!-- <option value="vob">VOB</option> -->
+    <!-- <option value="m2ts">M2TS</option> -->
+    <!-- <option value="f4v">F4V</option> -->
+    <!-- <option value="nsv">NSV</option> -->
+    <!-- <option value="ogv">OGV</option> -->
+    <!-- <option value="svi">SVI</option> -->
+    <!-- <option value="qt">QT (QuickTime)</option> -->
+    <!-- <option value="mxu">MXU</option> -->
+    <!-- <option value="mod">MOD</option> -->
+    <!-- <option value="tod">TOD</option> -->
+    <!-- <option value="iso">ISO</option> -->
+    <!-- <option value="xvid">XVID</option> -->
+    <!-- <option value="divx">DIVX</option> -->
+    <!-- <option value="bik">BINK</option> -->
+    <!-- <option value="fli">FLI</option> -->
+    <!-- <option value="smk">SMK</option> -->
+    <!-- <option value="swf">SWF (Shockwave Flash)</option> -->
+    <!-- <option value="dvr-ms">DVR-MS</option> -->
+    <!-- <option value="vdr">VDR</option> -->
+    <!-- <option value="rmvb">RMVB</option> -->
+    <!-- <option value="smp">SMP</option> -->
+    <!-- <option value="x264">H.264 (x264)</option> -->
+    <!-- <option value="hevc">HEVC (H.265)</option> -->
+    <!-- <option value="vp8">VP8</option> -->
+    <!-- <option value="vp9">VP9</option> -->
+    <!-- <option value="avchd">AVCHD</option> -->
+    <!-- <option value="h263">H.263</option> -->
+    <!-- <option value="dirac">Dirac</option> -->
+    <!-- <option value="mpeg-1">MPEG-1</option> -->
+    <!-- <option value="mpeg-2">MPEG-2</option> -->
+    <!-- <option value="mpeg-4">MPEG-4</option> -->
+    <!-- <option value="hds">HDS (HTTP Dynamic Streaming)</option> -->
+    <!-- <option value="camv">CAMV</option> -->
+    <!-- <option value="amv">AMV</option> -->
+    <!-- <option value="ivf">IVF</option> -->
+    <!-- <option value="rmf">RMF</option> -->
+    <!-- <option value="xvid">XVID</option> -->
+    <!-- <option value="vp6">VP6</option> -->
+    <!-- <option value="mpegps">MPEG-PS</option> -->
+    <!-- <option value="mjpg">MJPG</option> -->
+    <!-- <option value="gxf">GXF</option> -->
+    <!-- <option value="h265">H.265</option> -->
+    <!-- <option value="trp">TRP</option> -->
+    <!-- <option value="dat">DAT</option> -->
+  <!-- </optgroup> -->
+<!-- </select> -->
+<!-- <button id="convertButton">Convert</button> -->
+<!-- <div id="convertedFile"></div> -->
+
+<!-- Scripts -->
+<!-- <script src="converter.js"></script> -->
+<script src="main.js"></script>
+
+</body>
+</html>

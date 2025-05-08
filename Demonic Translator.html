@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonic Converter</title>
+    <style>
+        body { 
+            background-color: black; 
+            color: red; 
+            text-align: center;
+            font-family: 'Old English Text MT', fantasy, serif;
+        }
+        textarea { 
+            width: 80%; 
+            height: 100px; 
+            margin: 10px; 
+            background-color: #222; 
+            color: red; 
+            border: 2px solid darkred;
+            padding: 10px;
+        }
+        button { 
+            padding: 10px; 
+            margin: 5px; 
+            cursor: pointer; 
+            background-color: darkred; 
+            color: black; 
+            border: 2px solid red; 
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: red;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <h2>Demonic Converter</h2>
+    <textarea id="inputText" placeholder="Enter text..."></textarea><br>
+    <button onclick="convertToDemonic()">Convert to Demonic</button>
+    <button onclick="convertToEnglish()">Convert to English</button>
+    <textarea id="outputText" placeholder="Result..." readonly></textarea>
+
+    <script>
+        const mapping = {
+            'A': 'M', 'B': 'F', 'C': 'S', 'D': 'D', 'E': 'L', 'F': 'Z', 'G': 'V', 'H': 'R', 'I': 'N', 'J': 'T',
+            'K': 'C', 'L': 'B', 'M': 'A', 'N': 'J', 'O': 'E', 'P': 'W', 'Q': 'T', 'R': 'G', 'S': 'I', 'T': 'H',
+            'U': 'P', 'V': 'W', 'X': 'Q', 'Y': 'O', 'Z': 'X'
+        };
+        const reverseMapping = Object.fromEntries(Object.entries(mapping).map(([key, value]) => [value, key]));
+
+        function convertToDemonic() {
+            let input = document.getElementById("inputText").value;
+            let output = input.split('').map(char => {
+                let isLowerCase = char === char.toLowerCase();
+                let upperChar = char.toUpperCase();
+                let converted = mapping[upperChar] || char;
+                return isLowerCase ? converted.toLowerCase() : converted;
+            }).join('');
+            document.getElementById("outputText").value = output;
+        }
+
+        function convertToEnglish() {
+            let input = document.getElementById("inputText").value;
+            let output = input.split('').map(char => {
+                let isLowerCase = char === char.toLowerCase();
+                let upperChar = char.toUpperCase();
+                let converted = reverseMapping[upperChar] || char;
+                return isLowerCase ? converted.toLowerCase() : converted;
+            }).join('');
+            document.getElementById("outputText").value = output;
+        }
+    </script>
+</body>
+</html>

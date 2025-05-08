@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Chronometer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0"></script>
+  <style>
+    body {
+      font-family: 'Special Elite', monospace;
+      background: radial-gradient(ellipse at center, #1b1b1b 0%, #0a0a0a 100%);
+      color: #d0aa64;
+      margin: 0;
+      padding: 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #f0d49a;
+      text-shadow: 0 0 5px #d0aa64;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .time-section {
+      background: rgba(48, 36, 26, 0.8);
+      border: 1px solid #a97c50;
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      color: #ccffcc;
+      text-shadow: 0 0 3px #88ff88;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fun-section {
+      grid-column: span 2;
+      background: rgba(36, 28, 22, 0.8);
+      padding: 1rem;
+      margin-top: 1rem;
+      border: 1px solid #a97c50;
+      border-radius: 6px;
+      text-align: center;
+      color: #f0d49a;
+    }
+	
+    @media (max-width: 600px) {
+     .grid {
+     grid-template-columns: 1fr; /* Collapse to a single column */
+    }
+
+    .fun-section {
+     grid-column: span 1; /* Remove span to align with new layout */
+     }
+    }
+
+  </style>
+</head>
+<body>
+  <h1>The Chronometer</h1>
+  <div class="grid">
+    <!-- Time Sections (Smallest to Largest) -->
+    <div class="time-section" id="picoTime">Picoseconds: </div>
+    <div class="time-section" id="nanoTime">Nanoseconds: </div>
+    <div class="time-section" id="microTime">Microseconds: </div>
+    <div class="time-section" id="milliTime">Milliseconds: </div>
+    <div class="time-section" id="seconds">Seconds: </div>
+    <div class="time-section" id="minutes">Minutes: </div>
+    <div class="time-section" id="hours">Hours: </div>
+    <div class="time-section" id="day">Day of Week: </div>
+    <div class="time-section" id="dayNumber">Day: </div>
+    <div class="time-section" id="date">Date: </div>
+    <div class="time-section" id="week">Week: </div>
+    <div class="time-section" id="month">Month: </div>
+    <div class="time-section" id="year">Year: </div>
+    <div class="time-section" id="decade">Decade: </div>
+    <div class="time-section" id="century">Century: </div>
+    <div class="time-section" id="millennium">Millennium: </div>
+    <div class="time-section" id="unix">Unix Time (s): </div>
+    <div class="time-section" id="iso">ISO String: </div>
+    <div class="time-section" id="utc">UTC String: </div>
+    <div class="time-section" id="locale">Locale String: </div>
+
+    <!-- Fun Section: Astronomical & Zodiac Data -->
+    <div class="fun-section">
+      <h2>Astronomical & Zodiac Data</h2>
+      <div class="time-section" id="sunPos">Sun Position: </div>
+      <div class="time-section" id="moonPos">Moon Position: </div>
+      <div class="time-section" id="nextEclipse">Next Eclipse: </div>
+      <div class="time-section" id="zodiacSign">Zodiac Sign: </div>
+      <div class="time-section" id="element">Chinese Zodiac Element: </div>
+      <div class="time-section" id="westernElement">Zodiac Element: </div>
+	  <div class="time-section" id="moonPhase">Moon Phase: </div>
+    </div>
+  </div>
+
+  <script>
+    const zodiacSigns = [
+      { sign: "Aries", start: [3, 21], end: [4, 19] },
+      { sign: "Taurus", start: [4, 20], end: [5, 20] },
+      { sign: "Gemini", start: [5, 21], end: [6, 20] },
+      { sign: "Cancer", start: [6, 21], end: [7, 22] },
+      { sign: "Leo", start: [7, 23], end: [8, 22] },
+      { sign: "Virgo", start: [8, 23], end: [9, 22] },
+      { sign: "Libra", start: [9, 23], end: [10, 22] },
+      { sign: "Scorpio", start: [10, 23], end: [11, 21] },
+      { sign: "Sagittarius", start: [11, 22], end: [12, 21] },
+      { sign: "Capricorn", start: [12, 22], end: [1, 19] },
+      { sign: "Aquarius", start: [1, 20], end: [2, 18] },
+      { sign: "Pisces", start: [2, 19], end: [3, 20] },
+    ];
+
+    const chineseZodiac = [
+      "Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
+      "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"
+    ];
+    const elements = ["Wood", "Fire", "Earth", "Metal", "Water"];
+
+    function getZodiacSign(month, day) {
+      for (let sign of zodiacSigns) {
+        if (
+          (month === sign.start[0] && day >= sign.start[1]) ||
+          (month === sign.end[0] && day <= sign.end[1])
+        ) {
+          return sign.sign;
+        }
+      }
+      return null;
+    }
+
+    function getZodiacElement(sign) {
+      const elementsMap = {
+        Earth: ["Taurus", "Virgo", "Capricorn"],
+        Air: ["Gemini", "Libra", "Aquarius"],
+        Fire: ["Aries", "Leo", "Sagittarius"],
+        Water: ["Cancer", "Scorpio", "Pisces"]
+      };
+      for (let [element, signs] of Object.entries(elementsMap)) {
+        if (signs.includes(sign)) return element;
+      }
+      return "Unknown";
+    }
+
+    function getChineseZodiac(year) {
+      const animal = chineseZodiac[year % 12];
+      const element = elements[Math.floor((year - 4) % 10 / 2)];
+      return { animal, element };
+    }
+
+    function updateTime() {
+      const now = new Date();
+      const hrTime = performance.now();
+      const nano = Math.floor(hrTime * 1e6);
+      const micro = Math.floor(hrTime * 1e3);
+      const milli = now.getTime();
+      const sec = now.getSeconds();
+      const min = now.getMinutes();
+      const hrs = now.getHours();
+      const day = now.toLocaleString('en-US', { weekday: 'long' });
+      const date = now.toDateString();
+      const unix = Math.floor(now.getTime() / 1000);
+      const iso = now.toISOString();
+      const utc = now.toUTCString();
+      const locale = now.toLocaleString();
+
+      const year = now.getFullYear();
+      const decade = Math.floor(year / 10) * 10;
+      const century = Math.floor(year / 100) + 1;
+      const millennium = Math.floor(year / 1000) + 1;
+      const week = Math.ceil((now.getDate() - now.getDay() + 1) / 7);
+      const month = now.getMonth() + 1;
+      const monthName = now.toLocaleString('default', { month: 'long' });
+
+      const zodiacSign = getZodiacSign(month, now.getDate());
+      const westernElement = getZodiacElement(zodiacSign);
+      const chineseZodiacData = getChineseZodiac(year);
+
+      const sunPosition = SunCalc.getPosition(now, 0, 0);
+      const moonPosition = SunCalc.getMoonPosition(now, 0, 0);
+
+      const nextEclipse = "Lunar Eclipse: May 5, 2025"; // Placeholder
+	  
+	  const moonIllum = SunCalc.getMoonIllumination(now);
+	  const moonPhaseName = getMoonPhaseName(moonIllum.phase);
+
+      document.getElementById("picoTime").textContent = "Picoseconds (est): " + (nano * 1000);
+      document.getElementById("nanoTime").textContent = "Nanoseconds: " + nano;
+      document.getElementById("microTime").textContent = "Microseconds: " + micro;
+      document.getElementById("milliTime").textContent = "Milliseconds: " + milli;
+      document.getElementById("seconds").textContent = "Seconds: " + sec;
+      document.getElementById("minutes").textContent = "Minutes: " + min;
+      document.getElementById("hours").textContent = "Hours: " + hrs;
+      document.getElementById("day").textContent = "Day of Week: " + day;
+      document.getElementById("dayNumber").textContent = "Day: " + now.getDate();
+      document.getElementById("date").textContent = "Date: " + date;
+      document.getElementById("week").textContent = "Week: " + week;
+      document.getElementById("month").textContent = "Month: " + month + " (" + monthName + ")";
+      document.getElementById("year").textContent = "Year: " + year;
+      document.getElementById("decade").textContent = "Decade: " + decade + "s";
+      document.getElementById("century").textContent = "Century: " + century;
+      document.getElementById("millennium").textContent = "Millennium: " + millennium;
+      document.getElementById("unix").textContent = "Unix Time (s): " + unix;
+      document.getElementById("iso").textContent = "ISO String: " + iso;
+      document.getElementById("utc").textContent = "UTC String: " + utc;
+      document.getElementById("locale").textContent = "Locale String: " + locale;
+
+      document.getElementById("zodiacSign").textContent = `Zodiac Sign: ${zodiacSign}`;
+      document.getElementById("element").textContent = `Chinese Zodiac Element: ${chineseZodiacData.element}`;
+      document.getElementById("westernElement").textContent = `Zodiac Element: ${westernElement}`;
+
+      document.getElementById("sunPos").textContent = `Sun Altitude: ${sunPosition.altitude.toFixed(2)}° Azimuth: ${sunPosition.azimuth.toFixed(2)}°`;
+      document.getElementById("moonPos").textContent = `Moon Altitude: ${moonPosition.altitude.toFixed(2)}° Azimuth: ${moonPosition.azimuth.toFixed(2)}°`;
+      document.getElementById("nextEclipse").textContent = "Next Eclipse: " + nextEclipse;
+	  document.getElementById("moonPhase").textContent = `Moon Phase: ${moonPhaseName} (${(moonIllum.fraction * 100).toFixed(1)}%)`;
+	  
+	}
+	  
+	function getMoonPhaseName(phase) {
+		if (phase === 0) return "New Moon";
+		else if (phase < 0.25) return "Waxing Crescent";
+		else if (phase === 0.25) return "First Quarter";
+		else if (phase < 0.5) return "Waxing Gibbous";
+		else if (phase === 0.5) return "Full Moon";
+		else if (phase < 0.75) return "Waning Gibbous";
+		else if (phase === 0.75) return "Last Quarter";
+		else return "Waning Crescent";
+	}
+
+    
+
+    setInterval(updateTime, 100);
+    updateTime();
+  </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" >
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <title>ASCII Art Generator (Psychedelic Edition)</title>
+  <style>
+    @keyframes backgroundTrip {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #00ffff, 0 0 15px #ff00ff;
+       }
+      50% {
+       text-shadow: 0 0 15px #00ff00, 0 0 20px #ff0000, 0 0 25px #0000ff;
+      }
+    }
+
+    body {
+      font-family: 'Press Start 2P', cursive;
+      margin: 0;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      min-height: 100vh;
+      background: linear-gradient(-45deg, #ff00ff, #00ffff, #ffff00, #ff6600);
+      background-size: 400% 400%;
+      animation: backgroundTrip 20s ease infinite;
+      color: white;
+    }
+
+    h1 {
+      font-size: 2em;
+      text-align: center;
+      animation: pulseGlow 3s infinite;
+      background: linear-gradient(90deg, #ff0000, #00ff00, #0000ff, #ff00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    button, select, input[type="file"] {
+      font-family: 'Press Start 2P', monospace;
+      color: white;
+      border: 2px solid #ffffff33;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 0.5em;
+      margin: 0.5em;
+      border-radius: 10px;
+      animation: pulseGlow 2s infinite;
+    }
+
+    button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: #ffffffaa;
+    }
+
+    #asciiSet {
+      background: black;
+      color: white;
+      border: 2px solid #ff00ff;
+      padding: 0.3em;
+      border-radius: 5px;
+      animation: pulseGlow 4s infinite;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1em;
+      margin-top: 1em;
+    }
+
+    #canvasContainer {
+      margin-top: 1em;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1em;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+	
+	/* Hide scrollbar for all browsers while keeping scroll functionality */
+     body {
+     overflow-y: scroll; /* Ensures scroll works even when hidden */
+     scrollbar-width: none; /* Firefox */
+    }
+
+    body::-webkit-scrollbar {
+     display: none; /* Chrome, Safari, Edge */
+    }
+</style>
+
+</head>
+<body>
+  <h1>Image To ASCII Art (Psychedelic Edition)</h1>
+
+  <input type="file" id="imageInput" accept="image/*" />
+
+  <div class="controls">
+    <label for="asciiSet">ASCII Style:</label>
+    <select id="asciiSet">
+	
+      <!-- Basic Symbols and Characters -->
+      <optgroup label="Basic">
+       <option value="#,.0123456789:;@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz$">Default</option>
+       <option value="1234567890">Numbers</option>
+       <option value="M@WB08Za2SX7r;i:;.">Dense</option>
+       <option value="@#MBHAGh93X25Sisr;:,">Shaded</option>
+       <option value=".:-=+*#%@">Minimal</option>
+       <option value="01">Binary</option>
+       <option value="~!^*+=<>?|/(){}[]">Symbols</option>
+       <option value="\\/|(){}[]<>!">Slanted</option>
+       <option value=".:+*#MW&">Blocky</option>
+       <option value=".,-~:;=!*#$@">Smeared</option>
+	   <option value=".-/:;,?!&=().-">Morse Code</option>
+      </optgroup>
+	  
+	  <!-- Language Sets -->
+	  <optgroup label="Languages & Scripts">
+	   <option value="⠁⠃⠉⠋⠍⠏⠓⠗⠟⠹⠻⠽⠿⠷⠾">Braille Dots</option>
+	   <option value="АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопртсцуфхцчшщъыьэюяáЁ">Cyrillic</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz">Letters</option>
+	   <option value="àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿ">Accented Letters</option>
+	   <option value="אבגדהוזחטיכלמנסעפצקרשת״׳">Hebrew</option>
+	   <option value="ابتثجحخدذرزسشصضطظعغفقكلمنهويٱأاإئءؤ">Arabic</option>
+       <option value="日月火水木金土山川田口目耳手足心">Kanji (Basic)</option>
+	   <option value="あいうえおかきくけこさしすせそ">Hiragana</option>
+       <option value="アイウエオカキクケコサシスセソ">Katakana</option>
+	   <option value="日月火水木金土山川田口目耳手足心あいうえおかきくけこさしすせそアイウエオカキクケコサシスセソ">Japanese</option>
+	   <option value="αβγδεζηθικλμνξοπρστυφχψωΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ">Greek Letters</option>
+       <option value="的一是不了人我在有他這個上們來到時大地為子中你說生國年著就那和要她出也得裡後自以會家可下而過天去能對小多然於心學么之都好看起發成只如事把還用第樣道想作種開美手主現通重再經們已面工長知問現給從邊新高">Chinese (Combined)</option>
+       <option value="這個上們來到時大地為子中你說生國年著就那和要她出也得裡後自以會家可下而過天去能對小多然於心學">Chinese (Traditional)</option>
+       <option value="的一是不了人我在有他在有我在他的一是不了人說生年就那和要她出得里后自己会家可下而过天去能对小多然于心学">Chinese (Simplified)</option>
+       <option value="가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호구누두루무부수우주추쿠투푸후기니디리미비시이지치키티피히ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ">Korean</option>
+	   <option value="ɑɛɪɔʊθðʃʒŋɹʔ">IPA Phonetic</option>
+	   <option value="ℓξψαβγδεζηθικλμνξοπρστυφχψω">Special Letterforms</option>
+	   <option value="𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨ">Gothic Letters</option>
+       <option value="AƁCÐEƑGĤIĴKŁMŇOÞQŘSŦUƲWẊYẔ">Gothic Letters (Alt)</option>
+       <option value="ᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛋᛏᛒᛖᛗᛚᛜᛞᛟ">Runes</option>
+	   <option value="กขฃคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผพฟภมยรฤลฦวศษสหฬอฮ๑๒๓๔๕๖๗๘๙๐">Thai Script</option>
+	   <option value="अआइईउऊऋॠऌॡऍॎऒ॓॔कखगघङचछजझञटठडढणतथदधनपफबभमययरलवशषसहळक्षज्ञ०१२३४५६७८९">Sanskrit</option>
+	   <option value="അആഇഈഉഊഋൠൡഎഏഐ഑ഒഓഔകഖഗഘങചഛജഝഞടടഡഢണതഥദധനപഫബഭമയരലവശഷസഹളക്ഷജ്ഞ൦൧൨൩൪൫൬൭൮൯">Malayalam</option>
+	   <option value="ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՐՍՏՈՒՖՕՔՅՌՍՎՏՐՑՒՓՔՕՖ༠༡༢༣༤༥༦༧༨༩">Armenian</option>
+	   <option value="აბგდევზთიკლმნოპჟრსტუფქღყშთიიჲკახჯე๐๑๒๓๔๕๖๗๘๙">Georgian</option>
+	   <option value="অআইঈউঊঋৠঌৡএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহলক্ষজ্ঞ০১২৩৪৫৬৭৮৯">Bengali</option>
+	   <option value="ⲀⲂⲄⲆⲈⲉⲊⲌⲎⲐⲒⲓⲔⲕⲖⲗⲘⲙⲚⲛⲜⲝⲞⲟⲘⲡⲪⲫⲬⲭⲮⲯⲰⲱⲲⲳⲴⲵⲶⲷⲸⲹⲺⲻⲼⲽⲾⲿⲸⲺⲾⲼⲾⲿⲻⲯⲰⲰ">Coptic</option>
+	   <option value="ཀཁགངཅཆཇ཈ཉཊཋཌཌྷཎཏཐདནཔཕབབྷམཙཚཛཛྷཝཞཟའཡརལཤཥསཧཨཀྵཪཫཬ཭཮཯཰ཱཱཱིིུུྲྀཷླྀཹེཻོཽཾཿ">Tibetan</option>
+	   <option value="અઆઇઈઉઊઋૠએઐઓઔકખગઘઙચછજઝઞટઠડઢણતથદધનપફબભમયરલવશષસહળક્ષજ્ઞ૦૧૨૩૪૫૬૭૮૯">Gujarati</option>
+	   <option value="ကခဂဃငစဆဇဈဉညဋဌဍဎဏတထဒဓနပဖဗဘမယရလဝသဟဠအဧဣဤဥဦဧဩဨဩါာိီုူေဲံ">Burmese</option>
+	   <option value="កខគឃងចឆជឈញដឋឍណតថទធនបផពភមយរលវឝឞសហឡអឤឦឨឩឳ឴឵ាិីឹឺុូួ៓០១២៣៤៥៦៧៨៩">Khmer</option>
+	   <option value="అఆఇఈఉఊఋౠఎఏఐఒఓఔకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహళక్ష">Telugu</option>
+	   <option value="ಅಆಇಈಉಊಋೠಏಐಒಓಔಕಖಗಘಙಚಛಜಝಞಟಠಡಢಣತಥದಧನಪಫಬಭಮಯರಲವಶಷಸಹಳಕ್ಷ">Kannada</option>
+	   <option value="අආඇඈඉඊඋඌඑඒඓඔඕඖකඛගඝඞචඡජඣඤටඨඩඪණතථදධනපඵබභමඹයරලවශෂසහළෆ">Sinhala</option>
+	   <option value="அஆஇஈஉஊஎஏஐஒஓஔகஙசஜஞடணதநபமயரலவழளறன">Tamil</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÄÖÜäöüß">German</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÄäÖö">Finnish</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÆØÅæøå">Norwegian / Danish</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÅÄÖåäö">Swedish</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÐðÞþÆæÖö">Icelandic</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀÂÇÉÈÊËÎÏÔÛÙÜàâçéèêëîïôûùüÿ">French</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁÉÍÓÚÜÑáéíóúüñ¿¡">Spanish</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁÀÂÃÉÊÍÓÔÕÚÇáàâãéêíóôõúç">Portuguese</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzĄĆĘŁŃÓŚŹŻąćęłńóśźż">Polish</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁČĎÉĚÍŇÓŘŠŤÚŮÝŽáčďéěíňóřšťúůýž">Czech / Slovak</option>
+	   <option value="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÁÉÍÓÖŐÚÜŰáéíóöőúüű">Hungarian</option>
+	   <option value="⠁⠃⠉⠋⠍⠏⠓⠗⠟⠹⠻⠽⠿⠷⠾ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÐðÞþÀÂÇČĎÉÈÊËŇÎŘŠŤÏÔÛŁŮÙŐÚŰÄÖÜŚŹŻŽäöüßÆØÅæøåàáłâãäåæçèéêëìíîïðñòóôőõöøùúűûüřšťňůýþÿśźżžАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопртсцуфхцчшщъыьэюяáЁאבגדהוזחטיכלמנסעפצקרשת״׳ابتثجحخدذرزسشصضطظعغفقكلمنهويٱأاإئءؤ日月火水木金土山川田口目耳手足心あいうえおかきくけこさしすせそアイウエオカキクケコサシスセソ的一是不了人我在有他這個上們來到時大地為子中你說生國年著就那和要她出也得裡後自以會家可下而過天去能對小多然於心學么之都好看起發成只如事把還用第樣道想作種開美手主現通重再經們已面工長知問現給從邊新高가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호구누두루무부수우주추쿠투푸후기니디리미비시이지치키티피히ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣɑɛɪɔʊθðʃʒŋɹʔℓξψαβγδεζηθικλμνξοπρστυφχψω𝔄𝔅ℭ𝔇𝔈𝔉𝔊ℌℑ𝔍𝔎𝔏𝔐𝔑𝔒𝔓𝔔ℜ𝔖𝔗𝔘𝔙𝔚𝔛𝔜ℨAƁCÐEƑGĤIĴKŁMŇOÞQŘSŦUƲWẊYẔᚠᚢᚦᚨᚱᚲᚷᚹᚺᚾᛁᛃᛇᛈᛉᛋᛏᛒᛖᛗᛚᛜᛞᛟกขฃคฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผพฟภมยรฤลฦวศษสหฬอฮ๑๒๓๔๕๖๗๘๙๐अआइईउऊऋॠऌॡऍॎऒ॓॔कखगघङचछजझञटठडढणतथदधनपफबभमययरलवशषसहळक्षज्ञ०१२३४५६७८९അആഇഈഉഊഋൠൡഎഏഐ഑ഒഓഔകഖഗഘങചഛജഝഞടടഡഢണതഥദധനപഫബഭമയരലവശഷസഹളക്ഷജ്ഞ൦൧൨൩൪൫൬൭൮൯ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՐՍՏՈՒՖՕՔՅՌՍՎՏՐՑՒՓՔՕՖ༠༡༢༣༤༥༦༧༨༩აბგდევზთიკლმნოპჟრსტუფქღყშთიიჲკახჯე๐๑๒๓๔๕๖๗๘๙অআইঈউঊঋৠঌৡএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহলক্ষজ্ঞ০১২৩৪৫৬৭৮৯ⲀⲂⲄⲆⲈⲉⲊⲌⲎⲐⲒⲓⲔⲕⲖⲗⲘⲙⲚⲛⲜⲝⲞⲟⲘⲡⲪⲫⲬⲭⲮⲯⲰⲱⲲⲳⲴⲵⲶⲷⲸⲹⲺⲻⲼⲽⲾⲿⲸⲺⲾⲼⲾⲿⲻⲯⲰⲰཀཁགངཅཆཇ཈ཉཊཋཌཌྷཎཏཐདནཔཕབབྷམཙཚཛཛྷཝཞཟའཡརལཤཥསཧཨཀྵཪཫཬ཭཮཯཰ཱཱཱིིུུྲྀཷླྀཹེཻོཽཾཿઅઆઇઈઉઊઋૠએઐઓઔકખગઘઙચછજઝઞટઠડઢણતથદધનપફબભમયરલવશષસહળક્ષજ્ઞ૦૧૨૩૪૫૬૭૮૯ကခဂဃငစဆဇဈဉညဋဌဍဎဏတထဒဓနပဖဗဘမယရလဝသဟဠအဧဣဤဥဦဧဩဨဩါာိီုူေဲံកខគឃងចឆជឈញដឋឍណតថទធនបផពភមយរលវឝឞសហឡអឤឦឨឩឳ឴឵ាិីឹឺុូួ៓០១២៣៤៥៦៧៨៩అఆఇఈఉఊఋౠఎఏఐఒఓఔకఖగఘఙచఛజఝఞటఠడఢణతథదధనపఫబభమయరలవశషసహళక్షಅಆಇಈಉಊಋೠಏಐಒಓಔಕಖಗಘಙಚಛಜಝಞಟಠಡಢಣತಥದಧನಪಫಬಭಮಯರಲವಶಷಸಹಳಕ್ಷඅආඇඈඉඊඋඌඑඒඓඔඕඖකඛගඝඞචඡජඣඤටඨඩඪණතථදධනපඵබභමඹයරලවශෂසහළෆஅஆஇஈஉஊஎஏஐஒஓஔகஙசஜஞடணதநபமயரலவழளறன¿¡">Universal</option>
+	  </optgroup>
+
+      <!-- Blocks -->
+      <optgroup label="Blocks">
+       <option value="█▓▒░">Block Dark→Light</option>
+       <option value="░▒▓█">Block Light→Dark</option>
+       <option value="▏▎▍▌▐▋▊▉█▓▓▓▓▓▓▒▒▒▒▓▒▒▒▒▓▓▓▒▒▒▓▒▒▓▒▓▒▓▓▒▒▓▒▒▒▓▒▓▓▒▒">Monospace Retro</option>
+	   <option value="▓▒░▒▒▓▓▓▓▒░▒░▒▒▓▒▓░▓">Pixel Art</option>
+       <option value="▒▒▒▒▒▓▓▓▓▒▒▒▒▓▓▓▒▒▒▒▒▒▓▒▓▓▒▒▒▒▓▒▒▒▒▒▓▒▓▒▒▓▓▒▒▓▓▓▒">Classic Pixel Art </option>
+       <option value="█▓▒▒▓▓▒▒▓▒▓▓▓▓▒▒▓▒▓▓█▓▒▓▒▓▓▓▒▒▓▒▓▓▒▒▓▒▓▓▒▒▓▓▓▒">Retro Game Text </option>
+       <option value="░▒▓█▓▓▒▒▓▒▒▒▓▓▓▒▓▓▓▓▒▒▓▒▒▒▓▓▓▒▒▒▓▒▒▓▓▓▒▓▒▓▓▒▒▒▓▓▓█▒">Old-School Computing</option>
+       <option value="▒▒▓▓▒▓▒▓▒▒▒▒▓▒▒▓▒▓▒▒▓▓▓▓▒▒▓▓▒▒▒▓▒▒▒▓▒▓▒▒▓▓▓▒">8-Bit Retro</option>
+       <option value="▀▄▓█▓▒▓▒▓▒▓▒▒▒▒▓▒▓▓▓▓▓▓▒▒▓▒▒▒▒▓▓▓▒▒▒▓▒▓▒▒▓▓▒▒▓▒▓▓▒▓▒▒▒▒▓▒▓▓">Retro Icons</option>
+	   <option value="▒▓▓▓▒▒▓▒▓▓▓▒▒▓▓▒▒▓▒▓▓▒▒▒▒▓▒▒▒▓▒▒▒▓▓▓▓▓▓▓▒▒▒▓▒▓▒▓▓▒">Low-Res Art</option>
+       <option value="█▓▓▓▒▒▓▒▓▒▒▒▒▓▒▓▓▓▓▓▓▒▒▓▓▒▒▓▒▒▒▓▒▒▒▒▓▒▓▓▒▒▒▒▓▒▒▒▓▓▓▒">CRT Borders </option>
+	   <option value="⎯▖▗▘▝▙▜▛▜▘▖⎯▗▖▘▝▙">VHS/CRT Art</option>
+	   <option value="▁▂▃▄▅▆▇█">Ramp Low→High</option>
+	   <option value="█▇▆▅▄▃▂▁">Ramp High→Low</option>
+      </optgroup>
+
+      <!-- Emojis, Icons, and Thematic Symbols -->
+      <optgroup label="Icons & Emojis">
+       <option value="⚫⚪🔘⭕🔲⬛⬜">Emoji</option>
+       <option value="●○◉◎◍◌◕◔◯⬤⚪">Emoji (Alt)</option>
+       <option value="☺☻♠♣♥♦♨☼♪♫">Basic Icons</option>
+       <option value="♪♫♬♯♭♪">Music Notes</option>
+       <option value="♣♦✪⇝⇘⧫⟒⧗⧞⇱↡">Arcade Symbols</option>
+       <option value="♔♕♖♗♘♙♚♝♞♟">Chess</option>
+	   <option value="⚀⚁⚂⚃⚄⚅">Dice</option>
+      </optgroup>
+
+      <!-- Fancy Symbols, Borders, and Art -->
+      <optgroup label="Fancy & Thematic">
+       <option value="☆✯☽☀✵✦★✪✺✲✧*">Stars & Celestial</option>
+       <option value="✿❀❁❃❋✺✷✵✾✪✱">Fancy Characters</option>
+       <option value="♥♡➳➵➶➯⇌➼">Hearts & Arrows</option>
+	   <option value="←↑→↓↖↗↙↘↩↪⇨">Directional Arrows</option>
+       <option value="„“”‘’‾‿¯°‡†©™§¶‹›«»⌘⊙⊛⊝⊘">Fancy Punctuation</option>
+       <option value="“”‘’»«⟶⟷">Quote Marks</option>
+	   <option value="▲▼◆◇■□■◆◇▲▼⧫▀▄⧖⧗⧘⧙⧚⧛⧜⧝⧞⧟⧠⧡⧢⧣⧤⧥">Geometric Shapes</option>
+	   <option value="一丨丶丿乙亅亠冂冖冫几刂力十卩卩卩">CJK Radicals</option>
+	   <option value="☃☂☁☄☥☦☧☨☩☪☫☬☭℩⧫⊛⨀⩯⩫⩴⩷⩶⩸⩹">Obscure Symbols</option>
+	   <option value="⚔🛡⛨⚒⛏⛓">Weapons & Tools</option>
+       <option value="†‡±#/*><|">Weapons & Tools (Alt)</option>
+	   <option value="⚔⚒⚖⚑⚐☩⚜✠♖♘♗♕♔">Heraldry Symbols</option>
+       <option value="📜🍺🍷🍖🍗🪶📖">Tavern & Scrolls</option>
+       <option value="≡≣≷⚱⚚☤✍✎">Tavern & Scrolls (Alt)</option>
+       <option value="🐉🐲🦄🧙‍♂️🧝‍♀️✨">Magic & Beasts</option>
+       <option value="*~^¤§¶☼☯☠">Magic & Beasts (Alt)</option>
+	   <option value="☿♁♃♄♅♆♇⛢⚳⚚⚗⚱🜀🜁🜂🜃🜄🜅🜆🜇🜈🜉🜊🜋">Mystic Symbols</option>
+      </optgroup>
+
+      <!-- Mathematical and Technical Symbols -->
+      <optgroup label="Technical & Mathematical">
+       <option value="±∑∞∧∨√∝≈≠≡∈∉∫∂∆∇≠≈∞⊂⊆⊇∉∈⊕⊗⊥⊤⊶⊷⊙∩∪⊙⊘⊛⊝⊜⊦⊧⊨⊪⊬⊮ℵ∂⊥⌈⌉∥">Math Symbols</option>
+	   <option value="ΓΔΘΛΞΠΣΦΨΩαβγδεζηθικλμνξοπρστυφχψω">Greek Math Symbols</option>
+       <option value="€$£¥₹₣₣₤₧₩₽₺₿₼₯₪₳₵₼₾¤₤₧₳₣₰₶">Currency Symbols</option>
+       <option value="¼½⅓⅔⅕⅖⅗⅘⅞">Fractional Numbers</option>
+	   <option value="↔↕⇌⇍⇏⇐⇒⇑⇓">Tech Arrows</option>
+	   <option value="⍰☠⚠⧉▣⧗⎯≡⌇⌠⌡҉҂҈҉҉҇҉҉҉҉҉҈҇҉҇҈҉҇҂≡≣⍰⎯҉⧵⧶⨷⩚⩛⩘⩙⨍⩜↯"">Tech Glitch</option>
+	   <option value="⁰¹²³⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉">Superscript/Subscript</option>
+      </optgroup>
+
+      <!-- Art and Borders -->
+      <optgroup label="Art & Borders">
+       <option value="│─┼┌┐└┘┤┘╳╲╱┌┬┐├┼┤└┴┘─│─━│┃┄┅┆┇┈┉┊┋┌┍┎┏┐┑┒┓└┕┖┗┘┙┚┛├┝┞┟┠┡┢┣┤┥┦┧┨┩┪┫┬┭┮┯┰┱┲┳┴┵┶┷┸┹┺┻┼┽┾┿╀╁╂╃╄╅╆╇╈╉╊╋╬╪╫⍨⍤⍥⍧⍩⍼⎐⎑⎒⎓⎔⎕⍻">Lines & Borders</option>
+       <option value="`|\\-/()[]{}^~_">ASCII Art Code</option>
+       <option value="◇◉◎◆◉◆◇∗✲⦿◯⦿∗">Retro Sci-Fi</option>
+       <option value="☠⎦⎧⎪⎨⎩⎡⎫⎧⎭⎦⎪⎩⎡⎬⎫⎘">Old-School Games</option>
+       <option value="╔═╗║╚═╝╠╣╦╩╬">Medieval Borders</option>
+	   <option value=" .:-=+*#%@">Sparse Ramp</option>
+	   <option value="☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§⌂⌐¬½¼¡«»▀▄█▌▐░▒▓">DOS Art</option>
+      </optgroup>
+
+     <!-- Error and Debug Characters -->
+      <optgroup label="Debug & Errors">
+       <option value="�⛔️❓⚠️💀💢❌💥⚡💣❕❗🛑∞⊗÷⌘†">Error Characters</option>
+	   <option value="␀␁␂␃␄␅␆␇␈␉␊␋␌␍␎␏␛␜␝␞␟␠␡␢␣␤␥␦␧">Control Pictures</option>
+      </optgroup>
+    </select>
+
+
+    <label><input type="checkbox" id="flipASCII" /> Flip</label>
+    <label><input type="checkbox" id="useColor" /> Color</label>
+
+    <label>Brightness:
+      <input type="range" id="brightness" min="-100" max="100" value="0">
+      <span id="brightnessVal">0</span>
+    </label>
+
+    <label>Contrast:
+      <input type="range" id="contrast" min="-100" max="100" value="0">
+      <span id="contrastVal">0</span>
+    </label>
+
+    <label>Resolution:
+      <input type="range" id="resolution" min="1" max="20" value="6">
+      <span id="resolutionVal">6</span>
+    </label>
+
+    <button onclick="convertToASCII()">Convert</button>
+    <button onclick="downloadImage()">PNG</button>
+    <button onclick="downloadText()">TXT</button>
+  </div>
+
+  <div id="canvasContainer">
+    <canvas id="asciiCanvas"></canvas>
+  </div>
+
+  <script>
+    let originalImage = new Image();
+    let asciiTextOutput = '';
+
+    const $ = id => document.getElementById(id);
+
+    $('imageInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => originalImage.src = e.target.result;
+      reader.readAsDataURL(file);
+    });
+
+    ['brightness', 'contrast', 'resolution'].forEach(id => {
+      $(id).addEventListener('input', function () {
+        $(id + 'Val').innerText = this.value;
+      });
+    });
+
+    function convertToASCII() {
+      if (!originalImage.src) {
+        alert("Upload an image first.");
+        return;
+      }
+
+      let charset = $('asciiSet').value;
+      if ($('flipASCII').checked) charset = charset.split('').reverse().join('');
+      const useColor = $('useColor').checked;
+      const brightness = +$('brightness').value;
+      const contrast = +$('contrast').value;
+      const resolution = +$('resolution').value;
+
+      const canvas = $('asciiCanvas');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = originalImage.width;
+      canvas.height = originalImage.height;
+
+      ctx.drawImage(originalImage, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = `${resolution}px monospace`;
+      ctx.textBaseline = "top";
+
+      const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+      asciiTextOutput = '';
+
+      for (let y = 0; y < canvas.height; y += resolution) {
+        for (let x = 0; x < canvas.width; x += resolution) {
+          const i = (y * canvas.width + x) * 4;
+          let [r, g, b] = [data[i], data[i+1], data[i+2]].map(v => {
+            v = v + brightness;
+            v = Math.max(0, Math.min(255, v));
+            return factor * (v - 128) + 128;
+          });
+          r = Math.max(0, Math.min(255, r));
+          g = Math.max(0, Math.min(255, g));
+          b = Math.max(0, Math.min(255, b));
+
+          const avg = (r + g + b) / 3;
+          const charIndex = Math.floor(avg / 256 * charset.length);
+          const char = charset[charIndex] || ' ';
+
+          ctx.fillStyle = useColor ? `rgb(${r},${g},${b})` : 'white';
+          ctx.fillText(char, x, y);
+          asciiTextOutput += char;
+        }
+        asciiTextOutput += '\n';
+      }
+
+      canvas.style.display = 'block';
+    }
+
+    function downloadImage() {
+      const link = document.createElement('a');
+      link.download = 'ascii_image.png';
+      link.href = $('asciiCanvas').toDataURL();
+      link.click();
+    }
+
+    function downloadText() {
+      if (!asciiTextOutput) return alert("No ASCII generated yet.");
+      const blob = new Blob([asciiTextOutput], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.download = 'ascii_art.txt';
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }
+  </script>
+  <div class="crt-overlay"></div>
+  
+  <footer class="footer">
+   <p>Contact me on Discord for any suggestions or additions: <strong>rerumuzu_ekuripusu</strong></p>
+  </footer>
+</body>
+</html>

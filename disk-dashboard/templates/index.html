@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>System Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Disk Dashboard</h1>
+  <button onclick="toggleDark()">Toggle Dark Mode</button>
+
+  {% for d in drives %}
+    <div class="drive">
+      <h3>{{ d.device }} ({{ d.mount }})</h3>
+      <canvas id="chart{{ loop.index }}"></canvas>
+      <p>Total: {{ (d.total / 1e9)|round(2) }} GB | Used: {{ (d.used / 1e9)|round(2) }} GB | Free: {{ (d.free / 1e9)|round(2) }} GB</p>
+      <div class="bar"><div class="fill" style="width: {{ d.percent }}%"></div></div>
+      <button onclick="browse('{{ d.mount }}')">Browse</button>
+    </div>
+    <script>
+      const ctx{{ loop.index }} = document.getElementById('chart{{ loop.index }}').getContext('2d');
+      new Chart(ctx{{ loop.index }}, {
+        type: 'pie',
+        data: {
+          labels: ['Used', 'Free'],
+          datasets: [{
+            data: [{{ d.used }}, {{ d.free }}],
+            backgroundColor: ['#ef4444', '#10b981']
+          }]
+        },
+        options: { responsive: true }
+      });
+    </script>
+  {% endfor %}
+
+  <div class="file-browser">
+    <h2>File Browser</h2>
+    <div id="current-path"></div>
+    <input type="file" id="uploadInput" onchange="uploadFile()" style="display:none;">
+    <button onclick="document.getElementById('uploadInput').click()">Upload File</button>
+    <ul id="file-list"></ul>
+  </div>
+
+  <script>
+    let currentPath = '';
+    function browse(path) {
+      currentPath = path;
+      document.getElementById('current-path').textContent = 'Browsing: ' + path;
+      fetch('/browse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      })
+      .then(res => res.json())
+      .then(data => {
+        const list = document.getElementById('file-list');
+        list.innerHTML = '';
+        if (Array.isArray(data)) {
+          data.forEach(item => {
+            const li = document.createElement('li');
+            li.innerHTML = item.is_dir
+              ? `<span class="dir" onclick="browse('${item.path}')">${item.name}</span>`
+              : `${item.name} <a href="/download?path=${encodeURIComponent(item.path)}">Download</a> <button onclick="deleteFile('${item.path}')">Delete</button>`;
+
+            if (item.preview) {
+              if (item.preview.startsWith('/download')) {
+                li.innerHTML += `<br><img src="${item.preview}" class="preview">`;
+              } else {
+                li.innerHTML += `<div class="preview">${item.preview}</div>`;
+              }
+            }
+
+            list.appendChild(li);
+          });
+        } else {
+          list.innerHTML = '<li>Error loading folder</li>';
+        }
+      });
+    }
+
+    function deleteFile(path) {
+      fetch('/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path })
+      }).then(() => browse(currentPath));
+    }
+
+    function uploadFile() {
+      const file = document.getElementById('uploadInput').files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('path', currentPath);
+      fetch('/upload', { method: 'POST', body: formData })
+        .then(() => browse(currentPath));
+    }
+
+    function toggleDark() {
+      document.body.classList.toggle('dark-mode');
+    }
+
+    // Auto-refresh every 30s
+    setInterval(() => location.reload(), 30000);
+  </script>
+</body>
+</html>

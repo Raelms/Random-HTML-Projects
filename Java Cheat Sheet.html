@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Java Cheat Sheet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background: #f4f4f4;
+      padding: 20px;
+      font-size: 16px;
+    }
+    h2 {
+      background: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 1.2em;
+    }
+    pre {
+      background: #222;
+      color: #0f0;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 0.95em;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        font-size: 18px;
+        padding: 10px;
+      }
+      h2 {
+        font-size: 1.4em;
+      }
+      pre {
+        font-size: 1.05em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Java Cheat Sheet</h1>
+
+  <div class="section">
+    <h2>1. Introduction to Java</h2>
+    <p>Java is a high-level, class-based, object-oriented language that is platform-independent via the Java Virtual Machine (JVM).</p>
+    <ul>
+      <li><strong>JDK</strong>: Java Development Kit (tools for development)</li>
+      <li><strong>JRE</strong>: Java Runtime Environment (to run Java apps)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>2. Basic Objects</h2>
+    <pre>String s = "Hello";
+Integer num = 42;
+Double d = 3.14;
+Boolean b = true;</pre>
+    <p>Java wraps primitive types in classes like <code>Integer</code> and <code>Boolean</code> for use in collections and generics.</p>
+  </div>
+
+  <div class="section">
+    <h2>3. Basic Methods & Classes</h2>
+    <pre>class Dog {
+    String name;
+    Dog(String name) {
+        this.name = name;
+    }
+    void bark() {
+        System.out.println(name + " says Woof!");
+    }
+}</pre>
+    <p>Classes define objects. Methods define object behavior.</p>
+  </div>
+
+  <div class="section">
+    <h2>4. Data Types</h2>
+    <pre>int x = 10;
+long l = 100000L;
+double pi = 3.1415;
+char c = 'A';
+boolean flag = false;</pre>
+    <p>Java has 8 primitive types: byte, short, int, long, float, double, char, and boolean.</p>
+  </div>
+
+  <div class="section">
+    <h2>5. Branches</h2>
+    <pre>if (x > 0) {
+    System.out.println("Positive");
+} else {
+    System.out.println("Non-positive");
+}
+
+switch (x) {
+    case 1: System.out.println("One"); break;
+    default: System.out.println("Other");
+}</pre>
+    <p>Use <code>if</code> or <code>switch</code> to perform conditional logic.</p>
+  </div>
+
+  <div class="section">
+    <h2>6. Loops</h2>
+    <pre>for (int i = 0; i < 5; i++) {
+    System.out.println(i);
+}</pre>
+    <p>Other loops include <code>while</code> and <code>do...while</code>.</p>
+  </div>
+
+  <div class="section">
+    <h2>7. Arrays</h2>
+    <pre>int[] nums = {1, 2, 3, 4};
+for (int n : nums) {
+    System.out.println(n);
+}</pre>
+    <p>Arrays are fixed-size data structures.</p>
+  </div>
+
+  <div class="section">
+    <h2>8. Methods Continued</h2>
+    <pre>public int add(int a, int b) {
+    return a + b;
+}</pre>
+    <p>Methods can return values and take parameters. Use <code>static</code> for class-level methods.</p>
+  </div>
+
+  <div class="section">
+    <h2>9. Classes Continued</h2>
+    <pre>class Cat {
+    private String breed;
+    public String getBreed() { return breed; }
+    public void setBreed(String breed) { this.breed = breed; }
+}</pre>
+    <p>Encapsulation hides internal states using <code>private</code> and accessors.</p>
+  </div>
+
+  <div class="section">
+    <h2>10. Inheritance</h2>
+    <pre>class Animal {
+    void eat() { System.out.println("Eats food"); }
+}
+class Bird extends Animal {
+    void fly() { System.out.println("Flies"); }
+}</pre>
+    <p>Java supports single inheritance with <code>extends</code>.</p>
+  </div>
+
+  <div class="section">
+    <h2>11. Generics</h2>
+    <pre>class Box&lt;T&gt; {
+    private T item;
+    void set(T item) { this.item = item; }
+    T get() { return item; }
+}</pre>
+    <p>Generics allow classes to operate on typed data.</p>
+  </div>
+
+  <div class="section">
+    <h2>12. Collections</h2>
+    <pre>List&lt;String&gt; list = new ArrayList&lt;&gt;();
+Map&lt;String, Integer&gt; map = new HashMap&lt;&gt;();</pre>
+    <p>Java collections include List, Set, and Map interfaces and their implementations.</p>
+  </div>
+
+  <div class="section">
+    <h2>Bonus: Obscure Java Features</h2>
+    <pre>// Anonymous Class
+Runnable r = new Runnable() {
+    public void run() {
+        System.out.println("Run");
+    }
+};
+
+// Varargs
+public void printAll(String... args) {
+    for (String s : args) {
+        System.out.println(s);
+    }
+}
+
+// Enum
+enum Color { RED, GREEN, BLUE }
+
+// Static Block
+static {
+    System.out.println("Runs once when class loads");
+}
+
+// Reflection
+Method[] methods = String.class.getDeclaredMethods();</pre>
+    <p>These features allow for more flexible and advanced programming patterns.</p>
+  </div>
+</body>
+</html>

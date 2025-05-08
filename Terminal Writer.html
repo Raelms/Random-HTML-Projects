@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🕋 Terminal Writer</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #33ff33;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 30px;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+      text-shadow: 0 0 5px #33ff33;
+    }
+    select, button {
+      background-color: #000;
+      color: #33ff33;
+      border: 1px solid #33ff33;
+      font-family: inherit;
+      padding: 5px 10px;
+      margin: 5px;
+    }
+    textarea {
+      width: 100%;
+      height: 250px;
+      background-color: #000;
+      color: #33ff33;
+      border: 2px solid #33ff33;
+      font-size: 1rem;
+      padding: 15px;
+      box-shadow: 0 0 10px #33ff33;
+      resize: vertical;
+    }
+    .counts, .extras {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      text-shadow: 0 0 3px #33ff33;
+    }
+    .counts span {
+      display: inline-block;
+      margin-right: 30px;
+    }
+    #markdownPreview {
+      margin-top: 15px;
+      border: 1px dashed #33ff33;
+      padding: 10px;
+      display: none;
+      white-space: pre-wrap;
+    }
+    ::selection {
+      background: #33ff33;
+      color: #000000;
+    }
+    .copy-buttons {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    .copy-buttons button {
+      flex: 1;
+    }
+	
+    @media (max-width: 600px) {
+      body {
+        padding: 15px;
+      }
+      h1, h2 {
+        font-size: 1.5rem;
+      }
+      textarea {
+        font-size: 1.1rem;
+        padding: 15px;
+        height: 250px;
+      }
+      .counts, .extras {
+        font-size: 1.1rem;
+      }
+      .counts span {
+        display: block;
+        margin-bottom: 10px;
+      }
+      select, button {
+        width: 100%;
+        font-size: 1.1rem;
+        padding: 12px;
+        margin: 6px 0;
+      }
+      .copy-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="typing-effect">Terminal Writer</h1>
+
+  <label for="modeSelect">Choose Mode:</label>
+  <select id="modeSelect">
+    <option value="normal">✏️ Normal</option>
+    <option value="story">📖 Story</option>
+    <option value="poem">✨ Poem</option>
+    <option value="haiku">🈶 Haiku</option>
+    <option value="song">🎵 Song</option>
+    <option value="essay">🨠 Essay</option>
+    <option value="chapter">📚 Chapter</option>
+  </select>
+  <div id="modeTip"></div>
+
+  <label for="platformSelect">Social Media Mode:</label>
+  <select id="platformSelect">
+    <option value="">💤 Off</option>
+    <option value="bluesky">🌤 Blue Sky (300)</option>
+    <option value="twitter">🐦 Twitter (280)</option>
+    <option value="facebook">📘 Facebook (20,000)</option>
+    <option value="messenger">💬 FB Messenger (20,000)</option>
+    <option value="discord">👾 Discord (2,000)</option>
+    <option value="reddit_post">👽 Reddit Post (40,000)</option>
+    <option value="reddit_comment">💬 Reddit Comment (10,000)</option>
+    <option value="snapchat">👻 Snapchat (1,500)</option>
+    <option value="revolt">🚩 Revolt (2,000)</option>
+    <option value="telegram">✈️ Telegram (4,070)</option>
+    <option value="whatsapp">🟢 WhatsApp (4,070)</option>
+    <option value="vk">🆚 VK (4,000)</option>
+    <option value="messages">📱 Google Messages (8,000)</option>
+  </select>
+  <div id="socialTip" style="margin-top:10px;"></div>
+
+  <textarea id="textInput" placeholder="Start writing..."></textarea>
+
+  <div class="counts">
+    <span id="wordCount">Words: 0</span>
+    <span id="charCount">Characters: 0</span>
+  </div>
+
+  <div class="extras">
+    <button onclick="togglePreview()">📝 Markdown Preview</button>
+    <button onclick="downloadText()">⬇️ Export .txt</button>
+    <button onclick="downloadMarkdown()">⬇️ Export .md</button>
+  </div>
+
+  <div id="markdownPreview"></div>
+  <div id="wordFreq"></div>
+
+  <div class="copy-buttons">
+    <button onclick="copyText('textInput')">Copy Text</button>
+    <button onclick="pasteText()">Paste Text</button>
+    <button onclick="clearText()">Clear Text</button>
+    <button onclick="clearLocalDraft()">🗑️ Delete Saved Draft</button>
+  </div>
+
+  <script>
+    const textInput = document.getElementById('textInput');
+    const wordCount = document.getElementById('wordCount');
+    const charCount = document.getElementById('charCount');
+    const modeSelect = document.getElementById('modeSelect');
+    const modeTip = document.getElementById('modeTip');
+    const preview = document.getElementById('markdownPreview');
+    const freqDisplay = document.getElementById('wordFreq');
+    const platformSelect = document.getElementById("platformSelect");
+    const socialTip = document.getElementById("socialTip");
+
+    const modes = {
+      normal: { limit: Infinity, tip: "Just write freely. No limits." },
+      story:  { limit: 540000, tip: "Build your world, scene by scene. 540,000 characters." },
+      poem:   { limit: 2000, tip: "Use line breaks. Think in stanzas and images. 2,000 characters." },
+      haiku:  { limit: 40, tip: "Haiku format: 3 lines, 5-7-5 syllables. 40 characters." },
+      song:   { limit: 4700, tip: "Structure with verses, chorus, and rhymes. 4,700 characters." },
+      essay:  { limit: 30000, tip: "Clear arguments. Watch for passive voice. 30,000 characters." },
+      chapter:{ limit: 60000, tip: "Plan the arc. Chapters = mini stories. 60,000 characters." }
+    };
+
+    const platformLimits = {
+      bluesky: 300,
+      twitter: 280,
+      facebook: 20000,
+      messenger: 20000,
+      discord: 2000,
+      reddit_post: 40000,
+      reddit_comment: 10000,
+      snapchat: 1500,
+      revolt: 2000,
+      telegram: 4070,
+      whatsapp: 4070,
+      vk: 4000,
+      messages: 8000
+    };
+
+    let currentMode = modeSelect.value;
+
+    const loadDraft = () => {
+      const saved = localStorage.getItem(`draft_${currentMode}`);
+      if (saved) textInput.value = saved;
+    };
+
+    const saveDraft = () => {
+      localStorage.setItem(`draft_${currentMode}`, textInput.value);
+    };
+
+    const renderMarkdown = (text) =>
+      text.replace(/^### (.*)$/gm, '<h3>$1</h3>')
+          .replace(/^## (.*)$/gm, '<h2>$1</h2>')
+          .replace(/^# (.*)$/gm, '<h1>$1</h1>')
+          .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+          .replace(/\*(.*?)\*/g, '<i>$1</i>')
+          .replace(/`(.*?)`/g, '<code>$1</code>');
+
+    const updateCounts = () => {
+      const text = textInput.value;
+      const words = text.trim().split(/\s+/).filter(w => w.length);
+      wordCount.textContent = `Words: ${words.length}`;
+      charCount.textContent = `Characters: ${text.length}`;
+      saveDraft();
+
+      const mode = modes[currentMode];
+      modeTip.style.color = "#33ff33";
+      modeTip.textContent = mode.tip;
+
+      if (words.length > mode.limit && mode.limit !== Infinity) {
+        modeTip.textContent = `⚠️ Word limit exceeded (${words.length}/${mode.limit})`;
+        modeTip.style.color = "red";
+      }
+
+      if (currentMode === "haiku") {
+        const lines = text.split("\n");
+        if (lines.length !== 3) {
+          modeTip.textContent = `⚠️ Haiku should be 3 lines`;
+          modeTip.style.color = "red";
+        }
+      }
+
+      if (currentMode === "essay") {
+        const passive = /\b(is|was|were|be|been|being|are)\s+\w+ed\b/gi;
+        if (passive.test(text)) {
+          modeTip.textContent = "⚠️ Try to avoid passive voice!";
+          modeTip.style.color = "orange";
+        }
+      }
+
+      const freq = {};
+      const filtered = words.map(w => w.toLowerCase());
+      filtered.forEach(w => freq[w] = (freq[w] || 0) + 1);
+      const topWords = Object.entries(freq).sort((a,b) => b[1]-a[1]).slice(0,10);
+      freqDisplay.innerHTML = "<h3 style='text-shadow:0 0 2px #33ff33;'>Top Words</h3>" +
+        topWords.map(([w, c]) => `<span><b>${w}</b>: ${c}</span>`).join(" ");
+
+      if (preview.style.display === "block") {
+        preview.innerHTML = renderMarkdown(text);
+      }
+
+      // Update social media tip
+      const platform = platformSelect.value;
+      if (platform && platformLimits[platform]) {
+        const limit = platformLimits[platform];
+        socialTip.style.color = "#33ff33";
+        socialTip.textContent = `Post to ${platform.replace("_", " ")} – Max ${limit} characters.`;
+        if ([...text].length > limit) {
+          socialTip.textContent += ` ⚠️ Limit exceeded!`;
+          socialTip.style.color = "red";
+        }
+      } else {
+        socialTip.textContent = "";
+      }
+    };
+
+    const togglePreview = () => {
+      preview.style.display = preview.style.display === "block" ? "none" : "block";
+      if (preview.style.display === "block") {
+        preview.innerHTML = renderMarkdown(textInput.value);
+      }
+    };
+
+    const downloadText = () => {
+      const blob = new Blob([textInput.value], {type: "text/plain"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${currentMode}_draft.txt`;
+      link.click();
+    };
+
+    const downloadMarkdown = () => {
+      const blob = new Blob([textInput.value], {type: "text/markdown"});
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${currentMode}_draft.md`;
+      link.click();
+    };
+
+    textInput.addEventListener('input', updateCounts);
+    modeSelect.addEventListener('change', () => {
+      localStorage.setItem(`draft_${currentMode}`, textInput.value);
+      currentMode = modeSelect.value;
+      loadDraft();
+      updateCounts();
+    });
+    platformSelect.addEventListener("change", updateCounts);
+
+    function copyText(elementId) {
+      const text = document.getElementById(elementId);
+      text.select();
+      text.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(text.value).then(() => alert('Text copied!'));
+    }
+
+    async function pasteText() {
+      try {
+        const text = await navigator.clipboard.readText();
+        textInput.value = text;
+        textInput.dispatchEvent(new Event('input'));
+      } catch (err) {
+        alert('Failed to paste: Permission denied or unsupported browser.');
+      }
+    }
+
+    function clearText() {
+      if (confirm("Clear the text area? This cannot be undone.")) {
+        textInput.value = "";
+        updateCounts();
+      }
+    }
+
+    function clearLocalDraft() {
+      if (confirm("Delete saved draft for current mode? This cannot be undone.")) {
+        localStorage.removeItem(`draft_${currentMode}`);
+        alert("Draft deleted.");
+      }
+    }
+
+    loadDraft();
+    updateCounts();
+  </script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Time Measurement Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      margin-bottom: 6px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+    }
+    input.error {
+      border-color: red;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.85em;
+      margin-bottom: 10px;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 15px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h2>Time Measurement Converter</h2>
+
+  <label>Enter Time Value (in seconds)</label>
+  <input id="inputTime" oninput="convertTime()" placeholder="Enter time in seconds..." />
+
+  <div id="converters"></div>
+
+  <script>
+    // Time units array, sorted from smallest to largest
+    const timeUnits = [
+      { name: "Planck Time", value: 5.39e-44 },
+      { name: "Yoctosecond", value: 1e-24 },
+      { name: "Zeptosecond", value: 1e-21 },
+      { name: "Attosecond", value: 1e-18 },
+      { name: "Femtosecond", value: 1e-15 },
+      { name: "Picosecond", value: 1e-12 },
+      { name: "Nanosecond", value: 1e-9 },
+      { name: "Microsecond", value: 1e-6 },
+      { name: "Millisecond", value: 1e-3 },
+      { name: "Centisecond", value: 1e-2 },
+      { name: "Decisecond", value: 1e-1 },
+      { name: "Second", value: 1 },
+      { name: "Minute", value: 60 },
+      { name: "Hour", value: 3600 },
+      { name: "Day", value: 86400 },
+      { name: "Week", value: 604800 },
+      { name: "Fortnight", value: 1209600 },
+      { name: "Month", value: 2629746 },
+      { name: "Year", value: 31556952 },
+      { name: "Decade", value: 315569520 },
+      { name: "Century", value: 3155695200 },
+      { name: "Millennium", value: 31556952000 },
+      { name: "Hubble Time", value: 4.35e17 },
+      { name: "Kalpa", value: 4.32e9 },
+      { name: "Mahakalpa", value: 3.11e13 }
+    ];
+
+    const container = document.getElementById("converters");
+
+    // Create conversion inputs for each time unit
+    timeUnits.forEach((unit, index) => {
+      const label = document.createElement("label");
+      label.innerText = unit.name;
+
+      const input = document.createElement("input");
+      input.id = `unit${index}`;
+      input.dataset.unit = unit.name;
+      input.oninput = () => convertFrom(input, unit.value);
+
+      const error = document.createElement("div");
+      error.className = "error-message";
+      error.id = `error${index}`;
+
+      container.appendChild(label);
+      container.appendChild(input);
+      container.appendChild(error);
+    });
+
+    let updating = false;
+
+    function convertTime() {
+      const timeInSeconds = parseFloat(document.getElementById("inputTime").value);
+      if (isNaN(timeInSeconds)) return;
+
+      // Update all the conversions based on the input time
+      updateAll(timeInSeconds);
+    }
+
+    function convertFrom(sourceInput, baseUnitValue) {
+      if (updating) return;
+      updating = true;
+
+      const value = parseFloat(sourceInput.value.trim());
+      const errorDiv = document.getElementById(`error${sourceInput.id.replace('unit', '')}`);
+      errorDiv.textContent = '';
+      sourceInput.classList.remove("error");
+
+      try {
+        if (isNaN(value)) throw new Error("Invalid input");
+        const convertedValue = value * baseUnitValue;
+        updateAll(convertedValue, sourceInput);
+      } catch {
+        sourceInput.classList.add("error");
+        errorDiv.textContent = "Invalid input for " + sourceInput.dataset.unit;
+      }
+
+      updating = false;
+    }
+
+    function updateAll(seconds, excludeInput = null) {
+      updating = true;
+
+      timeUnits.forEach((unit, index) => {
+        const output = document.getElementById(`unit${index}`);
+        const errorDiv = document.getElementById(`error${index}`);
+        if (output === excludeInput) return;
+
+        try {
+          errorDiv.textContent = '';
+          output.classList.remove("error");
+          output.value = (seconds / unit.value).toFixed(6);
+        } catch {
+          output.classList.add("error");
+          errorDiv.textContent = "Conversion error";
+        }
+      });
+
+      updating = false;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML UML Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f0f0f0;
+    }
+    textarea {
+      width: 100%;
+      height: 200px;
+      padding: 1rem;
+      font-family: monospace;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+    }
+    pre {
+      background: #fff;
+      padding: 1rem;
+      white-space: pre-wrap;
+      border-radius: 10px;
+      margin-top: 1rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>HTML to UML-style Structure</h1>
+  <textarea id="htmlInput" placeholder="Paste HTML code here..."></textarea>
+  <br>
+  <button onclick="generateHTMLUML()">Generate</button>
+  <pre id="umlOutput"></pre>
+
+  <script>
+    function parseElement(el, indent = 0) {
+      const pad = '  '.repeat(indent);
+      let line = `${pad}+ ${el.tagName.toLowerCase()}`;
+      const attrs = [];
+
+      if (el.id) attrs.push(`id: ${el.id}`);
+      if (el.className) attrs.push(`class: ${el.className}`);
+      if (attrs.length) line += ` (${attrs.join(', ')})`;
+
+      let result = [line];
+
+      Array.from(el.children).forEach(child => {
+        result.push(...parseElement(child, indent + 1));
+      });
+
+      return result;
+    }
+
+    function generateHTMLUML() {
+      const htmlInput = document.getElementById("htmlInput").value;
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlInput, "text/html");
+      const bodyChildren = Array.from(doc.body.children);
+
+      let output = [];
+
+      bodyChildren.forEach(child => {
+        output.push(...parseElement(child));
+      });
+
+      document.getElementById("umlOutput").textContent = output.join("\n");
+    }
+  </script>
+</body>
+</html>
