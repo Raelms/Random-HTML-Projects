@@ -1,0 +1,12 @@
+Custom License for "Random HTML Projects"
+Copyright © Raelms 2025
+
+You are allowed to:
+- View and learn from the source code.
+- Modify the code for personal, non-commercial, and educational use only.
+
+You are NOT allowed to:
+- Redistribute the original or modified code in any form without explicit written permission.
+- Use the code or derivatives in malicious software, spam, phishing, or any harmful activity.
+
+This software is provided "as is", without warranty of any kind.
